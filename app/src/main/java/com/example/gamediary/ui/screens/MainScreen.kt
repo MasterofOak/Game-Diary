@@ -19,7 +19,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.gamediary.R
+import kotlinx.serialization.Serializable
 
 enum class BottomNavigationItems(
     val selectedIcon: ImageVector, val unselectedIcon: ImageVector, @StringRes val iconName: Int, @StringRes val label:
@@ -36,27 +41,51 @@ enum class BottomNavigationItems(
         selectedIcon = Icons.Filled.Search,
         unselectedIcon = Icons.Outlined.Search,
         iconName = R.string.search_btn_icon_name,
-        label = R.string.search_btn_label
+        label = R.string.search_btn_label,
     ),
     FeedButton(
         selectedIcon = Icons.Default.Newspaper,
         unselectedIcon = Icons.Outlined.Newspaper,
         iconName = R.string.feed_btn_icon_name,
-        label = R.string.feed_btn_label
+        label = R.string.feed_btn_label,
     )
 }
 
+@Serializable
+object GamesScreen
+
+@Serializable
+object SearchScreen
+
+@Serializable
+object FeedScreen
+
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun GameDiaryApp() {
+fun GameDiaryApp(navController: NavHostController) {
     Scaffold(
-        topBar = { TopNavBar(navigateUp = {}, canNavigateBack = true) },
-        bottomBar = { BottomNavBar() },
+        topBar = {
+            TopNavBar(
+                navigateUp = { navController.navigateUp() },
+                canNavigateBack = navController.previousBackStackEntry != null
+            )
+        },
+        bottomBar = { BottomNavBar(navigateTo = { navController.navigate(it) }) },
         floatingActionButton = { ActionButton(onClick = {}) },
         floatingActionButtonPosition = FabPosition.End,
         modifier = Modifier.fillMaxSize()
     ) { innerPadding ->
-        GameScreen(modifier = Modifier.padding(innerPadding))
+        NavHost(navController = navController, startDestination = GamesScreen) {
+            composable<GamesScreen> {
+                GameScreen(modifier = Modifier.padding(innerPadding))
+            }
+            composable<SearchScreen> {
+                SearchScreen(modifier = Modifier.padding(innerPadding))
+            }
+            composable<FeedScreen> {
+                FeedScreen(modifier = Modifier.padding(innerPadding))
+            }
+        }
     }
 }
 
@@ -75,7 +104,7 @@ fun ActionButton(onClick: () -> Unit) {
 @Composable
 fun TopNavBar(navigateUp: () -> Unit, canNavigateBack: Boolean) {
     CenterAlignedTopAppBar(
-        title = { Text("Game Diary") },
+        title = { Text(text = "Game Diary") },
         navigationIcon = {
             if (canNavigateBack) {
                 IconButton(
@@ -90,22 +119,26 @@ fun TopNavBar(navigateUp: () -> Unit, canNavigateBack: Boolean) {
             
         },
         actions = {
-            IconButton(
-                onClick = navigateUp,
-            ) {
-                Icon(
-                    imageVector = Icons.Default.MoreVert,
-                    contentDescription = "More Options Button"
-                )
+            if (canNavigateBack) {
+                IconButton(
+                    onClick = navigateUp,
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = "More Options Button"
+                    )
+                }
             }
+            
         },
         modifier = Modifier
     )
 }
 
 @Composable
-fun BottomNavBar() {
+fun BottomNavBar(navigateTo: (Any) -> Unit) {
     var selectedItem by remember { mutableIntStateOf(0) }
+    val bottomNavDestinations = listOf(GamesScreen, SearchScreen, FeedScreen)
     NavigationBar(windowInsets = WindowInsets(bottom = 8.dp)) {
         BottomNavigationItems.entries.forEachIndexed { index, item ->
             NavigationBarItem(
@@ -117,7 +150,7 @@ fun BottomNavBar() {
                 },
                 label = { Text(stringResource(item.label)) },
                 selected = selectedItem == index,
-                onClick = { selectedItem = index }
+                onClick = { selectedItem = index; navigateTo(bottomNavDestinations[index]) }
             )
             
         }
@@ -127,5 +160,5 @@ fun BottomNavBar() {
 @Preview
 @Composable
 fun GameDiaryApp_Preview() {
-    GameDiaryApp()
+    GameDiaryApp(rememberNavController())
 }

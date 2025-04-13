@@ -15,7 +15,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             GameDiaryTheme {
-                GameDiaryApp(navController = rememberNavController())
+                val gameDiaryNavController = rememberNavController()
+                GameDiaryApp(navController = gameDiaryNavController)
             }
         }
     }

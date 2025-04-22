@@ -1,7 +1,6 @@
 package com.example.gamediary.ui.screens
 
 import android.annotation.SuppressLint
-import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.scaleIn
@@ -11,72 +10,89 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.Newspaper
-import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material.icons.outlined.VideogameAsset
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.VideogameAsset
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavDestination
+import androidx.navigation.*
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navigation
 import com.example.gamediary.R
-import com.example.gamediary.ui.navigation.NavigationDestinations
-import com.example.gamediary.ui.navigation.NavigationGraphs
+import com.example.gamediary.navigation.BottomNavigationItems
+import com.example.gamediary.navigation.NavigationDestinations
+import com.example.gamediary.navigation.NavigationGraphs
+import com.example.gamediary.ui.viewmodel.GamesViewModel
 
-enum class BottomNavigationItems(
-    val selectedIcon: ImageVector, val unselectedIcon: ImageVector, @StringRes val iconName: Int, @StringRes val label:
-    Int, val destination: Any
-) {
-    
-    GameButton(
-        selectedIcon = Icons.Filled.VideogameAsset,
-        unselectedIcon = Icons.Outlined.VideogameAsset,
-        iconName = R.string.game_btn_icon_name,
-        label = R.string.game_btn_label,
-        destination = NavigationGraphs.GamesGraph
-    ),
-    SearchButton(
-        selectedIcon = Icons.Filled.Search,
-        unselectedIcon = Icons.Outlined.Search,
-        iconName = R.string.search_btn_icon_name,
-        label = R.string.search_btn_label,
-        destination = NavigationDestinations.SearchScreen
-    ),
-    FeedButton(
-        selectedIcon = Icons.Default.Newspaper,
-        unselectedIcon = Icons.Outlined.Newspaper,
-        iconName = R.string.feed_btn_icon_name,
-        label = R.string.feed_btn_label,
-        destination = NavigationDestinations.FeedScreen
-    )
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@Composable
+fun GameDiaryApp(navController: NavHostController) {
+    val appTitle = stringResource(R.string.app_name)
+    var currentTopAppBarTitle by remember { mutableStateOf<String>(appTitle) }
+    val entry by navController.currentBackStackEntryAsState()
+    val currentDestination = entry?.destination
+    Scaffold(
+        topBar = {
+            TopNavBar(
+                title = currentTopAppBarTitle,
+                canNavigateBack = navController.previousBackStackEntry != null,
+                navigateUp = { navController.navigateUp() }
+            )
+        },
+        bottomBar = {
+            BottomNavBar(
+                currentDestination = currentDestination,
+                navigateTo = { navController.navigateBetweenBottomNavigation(it) }
+            )
+        },
+        floatingActionButton = { ActionButtons(onGameFabClicked = { navController.navigate(NavigationDestinations.AddGameScreen) }) },
+        floatingActionButtonPosition = FabPosition.End,
+        modifier = Modifier.fillMaxSize()
+    ) { innerPadding ->
+        NavHost(
+            navController = navController,
+            startDestination = NavigationGraphs.GamesGraph,
+            modifier = Modifier.padding(innerPadding)
+        ) {
+            gamesGraph(navController, changeTopBarTitle = { currentTopAppBarTitle = it })
+            searchGraph(navController)
+            feedGraph(navController)
+        }
+    }
 }
 
-fun NavGraphBuilder.gamesGraph(navController: NavHostController) {
+fun NavGraphBuilder.gamesGraph(navController: NavHostController, changeTopBarTitle: (String) -> Unit) {
     navigation<NavigationGraphs.GamesGraph>(startDestination = NavigationDestinations.GamesScreen) {
-        composable<NavigationDestinations.GamesScreen> { route ->
-            GameScreen(modifier = Modifier, onGameClicked = {
-                navController.navigate(NavigationDestinations.GameDetail) {
-                }
-            })
+        val viewModel = GamesViewModel()
+        composable<NavigationDestinations.GamesScreen> { entry ->
+            changeTopBarTitle(entry.toRoute<NavigationDestinations.GamesScreen>().TITLE)
+            GameScreen(
+                viewModel = viewModel,
+                onGameClicked = { navController.navigate(NavigationDestinations.GameDetailScreen) },
+                onAddGameClicked = { navController.navigate(NavigationDestinations.AddGameScreen) },
+                modifier = Modifier
+            
+            )
         }
-        composable<NavigationDestinations.GameDetail> {
-            GameDetail(modifier = Modifier)
+        composable<NavigationDestinations.GameDetailScreen> {
+            GameDetailScreen(modifier = Modifier)
+        }
+        composable<NavigationDestinations.AddGameScreen> {
+            AddGameScreen(
+                viewModel = viewModel,
+                navigateUp = { navController.navigateUp() }
+            )
         }
     }
 }
@@ -97,56 +113,15 @@ fun NavGraphBuilder.feedGraph(navController: NavHostController) {
     }
 }
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun GameDiaryApp(navController: NavHostController) {
-    val entry by navController.currentBackStackEntryAsState()
-    val currentDestination = entry?.destination
-    Scaffold(
-        topBar = {
-            TopNavBar(
-                canNavigateBack = navController.previousBackStackEntry != null,
-                navigateUp = { navController.navigateUp() }
-            )
-        },
-        bottomBar = {
-            BottomNavBar(
-                currentDestination = currentDestination,
-                navigateTo = { navigateTo(navController, it) }
-            )
-        },
-        floatingActionButton = { ActionButton(onClick = {}) },
-        floatingActionButtonPosition = FabPosition.End,
-        modifier = Modifier.fillMaxSize()
-    ) { innerPadding ->
-        NavHost(
-            navController = navController,
-            startDestination = NavigationGraphs.GamesGraph,
-            modifier = Modifier.padding(innerPadding)
-        ) {
-            gamesGraph(navController)
-            searchGraph(navController)
-            feedGraph(navController)
-        }
-    }
-}
-
-@Composable
-fun GameDetail(modifier: Modifier = Modifier) {
-    Box(modifier = modifier.fillMaxSize()) {
-        Text("Text")
-    }
-}
-
-@Composable
-fun ActionButton(onClick: () -> Unit) {
+fun ActionButtons(onGameFabClicked: () -> Unit) {
     var isFabClicked by remember { mutableStateOf(false) }
     val rotation by animateFloatAsState(targetValue = if (isFabClicked) 45f else 0f, label = "FABRotation")
     LazyColumn(
         modifier = Modifier,
         horizontalAlignment = Alignment.End
     ) {
-        items(3) {
+        items(2) {
             AnimatedVisibility(
                 isFabClicked,
                 enter = scaleIn(),
@@ -160,9 +135,25 @@ fun ActionButton(onClick: () -> Unit) {
             }
         }
         item {
+            AnimatedVisibility(
+                isFabClicked,
+                enter = scaleIn(),
+                exit = scaleOut()
+            ) {
+                ExtendedFloatingActionButton(
+                    onClick = { onGameFabClicked(); isFabClicked = !isFabClicked }, modifier = Modifier
+                        .padding(4.dp)
+                ) {
+                    Text("Game")
+                    Spacer(modifier = Modifier.size(8.dp))
+                    Icon(imageVector = Icons.Default.VideogameAsset, "Add Game Action Button")
+                }
+            }
+        }
+        item {
             FloatingActionButton(
                 onClick = {
-                    onClick(); isFabClicked = !isFabClicked
+                    isFabClicked = !isFabClicked
                 },
                 shape = RoundedCornerShape(16.dp),
                 modifier = Modifier
@@ -179,9 +170,9 @@ fun ActionButton(onClick: () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopNavBar(canNavigateBack: Boolean, navigateUp: () -> Unit) {
+fun TopNavBar(title: String, canNavigateBack: Boolean, navigateUp: () -> Unit) {
     CenterAlignedTopAppBar(
-        title = { Text(text = "Game Diary") },
+        title = { Text(title) },
         navigationIcon = {
             if (canNavigateBack) {
                 IconButton(
@@ -231,9 +222,9 @@ fun BottomNavBar(currentDestination: NavDestination?, navigateTo: (destination: 
     }
 }
 
-private fun navigateTo(navController: NavHostController, destination: Any) {
-    navController.navigate(destination) {
-        popUpTo(navController.graph.findStartDestination().id) { saveState = true; inclusive = true }
+private fun NavHostController.navigateBetweenBottomNavigation(destination: Any) {
+    this.navigate(destination) {
+        popUpTo(graph.findStartDestination().id) { saveState = true; inclusive = true }
         launchSingleTop = true
         restoreState = true
     }

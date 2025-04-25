@@ -116,7 +116,7 @@ fun NavGraphBuilder.feedGraph(navController: NavHostController) {
 @Composable
 fun ActionButtons(onGameFabClicked: () -> Unit) {
     var isFabClicked by remember { mutableStateOf(false) }
-    val rotation by animateFloatAsState(targetValue = if (isFabClicked) 45f else 0f, label = "FABRotation")
+    val fabIconRotation by animateFloatAsState(targetValue = if (isFabClicked) 45f else 0f, label = "FABRotation")
     LazyColumn(
         modifier = Modifier,
         horizontalAlignment = Alignment.End
@@ -161,7 +161,7 @@ fun ActionButtons(onGameFabClicked: () -> Unit) {
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = "Add Button",
-                    modifier = Modifier.rotate(rotation)
+                    modifier = Modifier.rotate(fabIconRotation)
                 )
             }
         }

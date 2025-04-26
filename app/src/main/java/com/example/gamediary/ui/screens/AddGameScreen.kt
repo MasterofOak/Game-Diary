@@ -1,5 +1,6 @@
 package com.example.gamediary.ui.screens
 
+import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -12,10 +13,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.shrinkHorizontally
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
@@ -39,17 +37,22 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.gamediary.ui.theme.GameDiaryTheme
 import com.example.gamediary.ui.viewmodel.GamesViewModel
 import com.example.gamediary.utils.decodeBitmapFromUri
 
 @Composable
 fun AddGameScreen(
-    viewModel: GamesViewModel, navigateUp: () -> Unit, modifier: Modifier = Modifier
+    viewModel: GamesViewModel = viewModel(factory = GamesViewModel.factory),
+    navigateUp: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
+    val flag = Intent.FLAG_GRANT_READ_URI_PERMISSION
     var gameNameTextField by rememberSaveable { mutableStateOf("") }
     var imageUri by rememberSaveable { mutableStateOf<Uri?>(null) }
     val photoPicker = rememberLauncherForActivityResult(PickVisualMedia()) { uri -> imageUri = uri }
+    imageUri?.let { LocalContext.current.contentResolver.takePersistableUriPermission(it, flag) }
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -83,7 +86,7 @@ fun AddGameScreen(
             )
         }
         Tags()
-        Button(onClick = { viewModel.addGame(gameNameTextField, imageUri); navigateUp() }) {
+        Button(onClick = { viewModel.addGame(gameNameTextField, imageUri.toString()); navigateUp() }) {
             Text("Add Game")
         }
     }
@@ -91,7 +94,8 @@ fun AddGameScreen(
 
 @Composable
 private fun GameImage(
-    photoPicker: ManagedActivityResultLauncher<PickVisualMediaRequest, Uri?>, imageUri: Uri?,
+    photoPicker: ManagedActivityResultLauncher<PickVisualMediaRequest, Uri?>,
+    imageUri: Uri?,
     modifier: Modifier = Modifier
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -170,7 +174,12 @@ private fun Tags(modifier: Modifier = Modifier) {
                         label = { Text("RPG") },
                         trailingIcon = {
                             Icon(imageVector = Icons.Default.Star, contentDescription = "")
-                        })
+                        },
+                        colors = FilterChipDefaults.elevatedFilterChipColors(
+                            containerColor = Color(0xffFF3401), selectedContainerColor = Color(0xffFC957C)
+                        ),
+                        border = BorderStroke(4.dp, Color(0xffFC957C))
+                    )
                 }
             }
             
@@ -183,7 +192,6 @@ private fun Tags(modifier: Modifier = Modifier) {
 fun AddGameScreen_Preview() {
     GameDiaryTheme {
         AddGameScreen(
-            viewModel = GamesViewModel(),
             navigateUp = {},
             modifier = Modifier
         )

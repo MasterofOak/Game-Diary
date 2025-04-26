@@ -21,6 +21,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.*
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -60,25 +61,29 @@ fun GameDiaryApp(navController: NavHostController) {
         floatingActionButtonPosition = FabPosition.End,
         modifier = Modifier.fillMaxSize()
     ) { innerPadding ->
+        val gamesViewModel: GamesViewModel = viewModel(factory = GamesViewModel.factory)
         NavHost(
             navController = navController,
             startDestination = NavigationGraphs.GamesGraph,
             modifier = Modifier.padding(innerPadding)
         ) {
-            gamesGraph(navController, changeTopBarTitle = { currentTopAppBarTitle = it })
+            gamesGraph(navController, gamesViewModel, changeTopBarTitle = { currentTopAppBarTitle = it })
             searchGraph(navController)
             feedGraph(navController)
         }
     }
 }
 
-fun NavGraphBuilder.gamesGraph(navController: NavHostController, changeTopBarTitle: (String) -> Unit) {
+fun NavGraphBuilder.gamesGraph(
+    navController: NavHostController,
+    gamesViewModel: GamesViewModel,
+    changeTopBarTitle: (String) -> Unit
+) {
     navigation<NavigationGraphs.GamesGraph>(startDestination = NavigationDestinations.GamesScreen) {
-        val viewModel = GamesViewModel()
         composable<NavigationDestinations.GamesScreen> { entry ->
             changeTopBarTitle(entry.toRoute<NavigationDestinations.GamesScreen>().TITLE)
             GameScreen(
-                viewModel = viewModel,
+                viewModel = gamesViewModel,
                 onGameClicked = { navController.navigate(NavigationDestinations.GameDetailScreen) },
                 onAddGameClicked = { navController.navigate(NavigationDestinations.AddGameScreen) },
                 modifier = Modifier
@@ -90,7 +95,7 @@ fun NavGraphBuilder.gamesGraph(navController: NavHostController, changeTopBarTit
         }
         composable<NavigationDestinations.AddGameScreen> {
             AddGameScreen(
-                viewModel = viewModel,
+                viewModel = gamesViewModel,
                 navigateUp = { navController.navigateUp() }
             )
         }

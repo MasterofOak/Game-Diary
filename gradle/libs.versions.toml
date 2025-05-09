@@ -41,6 +41,7 @@ androidx-room-runtime = { group = "androidx.room", name = "room-runtime", versio
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
+room-plugin = { id = "androidx.room", version.ref = "roomKtx" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlinxSerializationPlugin" }

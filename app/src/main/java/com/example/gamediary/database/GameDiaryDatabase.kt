@@ -15,7 +15,7 @@ abstract class GameDiaryDatabase : RoomDatabase() {
     
     companion object {
         
-        const val LATEST_VERSION = 1
+        const val LATEST_VERSION = 3
         
         @Volatile
         private var Instance: GameDiaryDatabase? = null
@@ -23,7 +23,8 @@ abstract class GameDiaryDatabase : RoomDatabase() {
         fun getDatabase(context: Context): GameDiaryDatabase {
             return Instance ?: synchronized(this) {
                 Room.databaseBuilder(context, GameDiaryDatabase::class.java, "game_diary")
-                    .createFromAsset("database/game_diary.db").build().also { Instance = it }
+                    .createFromAsset("database/game_diary.db")
+                    .build().also { Instance = it }
             }
         }
         

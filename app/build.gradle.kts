@@ -4,8 +4,11 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.devtools.ksp)
+    alias(libs.plugins.room.plugin)
 }
-
+room {
+    schemaDirectory("$projectDir/schemas")
+}
 android {
     namespace = "com.example.gamediary"
     compileSdk = 35
@@ -19,7 +22,6 @@ android {
         
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
-    
     buildTypes {
         release {
             isMinifyEnabled = false

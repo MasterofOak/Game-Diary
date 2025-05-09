@@ -6,8 +6,17 @@ import kotlinx.coroutines.flow.Flow
 
 interface GamesDBRepository {
     
+    /**
+     *  [Game] related database functions
+     */
     fun getAllGames(): Flow<List<Game>>
-    fun getAllTags(): Flow<List<Tag>>
+    suspend fun getGameById(gameId: Int): Game
     suspend fun insertGame(game: Game)
     suspend fun deleteGame(gameId: Int)
+    
+    /**
+     * [Tag] related database functions
+     */
+    fun getAllTags(): Flow<List<Tag>>
+    suspend fun insertTag(tag: Tag)
 }

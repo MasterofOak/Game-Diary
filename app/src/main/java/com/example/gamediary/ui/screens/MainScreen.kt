@@ -1,10 +1,8 @@
 package com.example.gamediary.ui.screens
 
 import android.annotation.SuppressLint
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.*
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -30,23 +28,27 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.gamediary.R
+import com.example.gamediary.GlobalViewModelProvider
 import com.example.gamediary.navigation.BottomNavigationItems
 import com.example.gamediary.navigation.NavigationDestinations
 import com.example.gamediary.navigation.NavigationGraphs
+import com.example.gamediary.ui.viewmodel.AddGameViewModel
 import com.example.gamediary.ui.viewmodel.GamesViewModel
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun GameDiaryApp(navController: NavHostController) {
-    val appTitle = stringResource(R.string.app_name)
-    var currentTopAppBarTitle by remember { mutableStateOf<String>(appTitle) }
+    var topBarTitle by remember { mutableStateOf("") }
+    var isTopBarVisible by remember { mutableStateOf(true) }
+    var isBottomNavBarVisible by remember { mutableStateOf(true) }
     val entry by navController.currentBackStackEntryAsState()
     val currentDestination = entry?.destination
     Scaffold(
         topBar = {
             TopNavBar(
-                title = currentTopAppBarTitle,
+                title = topBarTitle,
+                isTopBarVisible = isTopBarVisible,
                 canNavigateBack = navController.previousBackStackEntry != null,
                 navigateUp = { navController.navigateUp() }
             )
@@ -54,6 +56,7 @@ fun GameDiaryApp(navController: NavHostController) {
         bottomBar = {
             BottomNavBar(
                 currentDestination = currentDestination,
+                isBottomNavBarVisible = isBottomNavBarVisible,
                 navigateTo = { navController.navigateBetweenBottomNavigation(it) }
             )
         },
@@ -61,41 +64,67 @@ fun GameDiaryApp(navController: NavHostController) {
         floatingActionButtonPosition = FabPosition.End,
         modifier = Modifier.fillMaxSize()
     ) { innerPadding ->
-        val gamesViewModel: GamesViewModel = viewModel(factory = GamesViewModel.factory)
-        NavHost(
-            navController = navController,
-            startDestination = NavigationGraphs.GamesGraph,
-            modifier = Modifier.padding(innerPadding)
-        ) {
-            gamesGraph(navController, gamesViewModel, changeTopBarTitle = { currentTopAppBarTitle = it })
-            searchGraph(navController)
-            feedGraph(navController)
+        val gamesViewModel: GamesViewModel = viewModel(factory = GlobalViewModelProvider.Factory)
+        val addGameViewModel: AddGameViewModel = viewModel(factory = GlobalViewModelProvider.Factory)
+        SharedTransitionLayout {
+            NavHost(
+                navController = navController,
+                startDestination = NavigationGraphs.GamesGraph,
+                modifier = Modifier.padding(innerPadding)
+            ) {
+                gamesGraph(
+                    navController,
+                    gamesViewModel,
+                    addGameViewModel,
+                    changeTopBarTitle = { topBarTitle = it },
+                    changeTopBarVisibility = { isTopBarVisible = !isTopBarVisible },
+                    changeBottomNavBarVisibility = { isBottomNavBarVisible = !isBottomNavBarVisible },
+                    this@SharedTransitionLayout
+                )
+                searchGraph(navController)
+                feedGraph(navController)
+            }
         }
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 fun NavGraphBuilder.gamesGraph(
     navController: NavHostController,
     gamesViewModel: GamesViewModel,
-    changeTopBarTitle: (String) -> Unit
+    addGameViewModel: AddGameViewModel,
+    changeTopBarTitle: (String) -> Unit,
+    changeTopBarVisibility: () -> Unit,
+    changeBottomNavBarVisibility: () -> Unit,
+    sharedTransitionScope: SharedTransitionScope
 ) {
     navigation<NavigationGraphs.GamesGraph>(startDestination = NavigationDestinations.GamesScreen) {
         composable<NavigationDestinations.GamesScreen> { entry ->
             changeTopBarTitle(entry.toRoute<NavigationDestinations.GamesScreen>().TITLE)
             GameScreen(
                 viewModel = gamesViewModel,
-                onGameClicked = { navController.navigate(NavigationDestinations.GameDetailScreen) },
+                sharedTransitionScope,
+                this@composable,
+                onGameClicked = { navController.navigate(NavigationDestinations.GameDetailScreen(it)) },
                 onAddGameClicked = { navController.navigate(NavigationDestinations.AddGameScreen) },
                 modifier = Modifier
             
             )
         }
-        composable<NavigationDestinations.GameDetailScreen> {
-            GameDetailScreen(modifier = Modifier)
+        composable<NavigationDestinations.GameDetailScreen> { entry ->
+            val gameId = entry.toRoute<NavigationDestinations.GameDetailScreen>().gameId
+            gamesViewModel.setGame(gameId)
+            GameDetailScreen(
+                viewModel = gamesViewModel,
+                sharedTransitionScope,
+                this@composable,
+                modifier = Modifier
+            )
         }
         composable<NavigationDestinations.AddGameScreen> {
             AddGameScreen(
-                viewModel = gamesViewModel,
+                viewModel = addGameViewModel,
+                changeBottomNavBarVisibility = changeBottomNavBarVisibility,
                 navigateUp = { navController.navigateUp() }
             )
         }
@@ -175,54 +204,62 @@ fun ActionButtons(onGameFabClicked: () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopNavBar(title: String, canNavigateBack: Boolean, navigateUp: () -> Unit) {
-    CenterAlignedTopAppBar(
-        title = { Text(title) },
-        navigationIcon = {
-            if (canNavigateBack) {
+fun TopNavBar(title: String, isTopBarVisible: Boolean, canNavigateBack: Boolean, navigateUp: () -> Unit) {
+    AnimatedVisibility(isTopBarVisible, enter = slideInVertically(), exit = slideOutVertically()) {
+        CenterAlignedTopAppBar(
+            title = { Text(title) },
+            navigationIcon = {
+                if (canNavigateBack) {
+                    IconButton(
+                        onClick = navigateUp,
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                            contentDescription = "Back Button"
+                        )
+                    }
+                }
+            },
+            actions = {
                 IconButton(
                     onClick = navigateUp,
                 ) {
                     Icon(
-                        imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                        contentDescription = "Back Button"
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = "More Options Button"
                     )
                 }
-            }
-        },
-        actions = {
-            IconButton(
-                onClick = navigateUp,
-            ) {
-                Icon(
-                    imageVector = Icons.Default.MoreVert,
-                    contentDescription = "More Options Button"
-                )
-            }
-            
-        },
-        modifier = Modifier
-    )
+                
+            },
+            modifier = Modifier
+        )
+    }
 }
 
 @Composable
-fun BottomNavBar(currentDestination: NavDestination?, navigateTo: (destination: Any) -> Unit) {
-    NavigationBar(windowInsets = WindowInsets(bottom = 8.dp)) {
-        BottomNavigationItems.entries.forEach { item ->
-            val isSelectedItem = currentDestination?.hierarchy?.any {
-                it.hasRoute(item.destination::class)
-            } == true
-            NavigationBarItem(
-                icon = {
-                    Icon(
-                        imageVector = if (isSelectedItem) item.selectedIcon else item.unselectedIcon,
-                        contentDescription = stringResource(item.iconName)
-                    )
-                },
-                label = { Text(stringResource(item.label)) },
-                selected = isSelectedItem,
-                onClick = { navigateTo(item.destination) }
-            )
+fun BottomNavBar(
+    currentDestination: NavDestination?,
+    isBottomNavBarVisible: Boolean,
+    navigateTo: (destination: Any) -> Unit
+) {
+    AnimatedVisibility(isBottomNavBarVisible, enter = slideInVertically(), exit = slideOutVertically()) {
+        NavigationBar(windowInsets = WindowInsets(bottom = 8.dp)) {
+            BottomNavigationItems.entries.forEach { item ->
+                val isSelectedItem = currentDestination?.hierarchy?.any {
+                    it.hasRoute(item.destination::class)
+                } == true
+                NavigationBarItem(
+                    icon = {
+                        Icon(
+                            imageVector = if (isSelectedItem) item.selectedIcon else item.unselectedIcon,
+                            contentDescription = stringResource(item.iconName)
+                        )
+                    },
+                    label = { Text(stringResource(item.label)) },
+                    selected = isSelectedItem,
+                    onClick = { navigateTo(item.destination) }
+                )
+            }
         }
     }
 }

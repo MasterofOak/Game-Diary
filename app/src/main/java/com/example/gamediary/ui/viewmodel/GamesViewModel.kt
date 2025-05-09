@@ -1,17 +1,11 @@
 package com.example.gamediary.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import com.example.gamediary.GameDiaryApplication
 import com.example.gamediary.database.GamesDBRepository
 import com.example.gamediary.model.Game
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class GamesViewModel(private val databaseRepository: GamesDBRepository) : ViewModel() {
@@ -27,9 +21,18 @@ class GamesViewModel(private val databaseRepository: GamesDBRepository) : ViewMo
         }
     }
     
-    fun addGame(gameName: String, imageUrl: String?) {
+    fun setGame(gameId: Int) {
+        _uiState.update { it.copy(currentGame = it.gamesList.find { it.id == gameId }) }
+    }
+    
+    /**
+    THINK: Is it worth to fetch information from DB or just use function above
+     */
+    fun setGameViaDb(gameId: Int) {
+        _uiState.update { it.copy(isLoading = true) }
         viewModelScope.launch {
-            databaseRepository.insertGame(game = Game(gameName = gameName, imageUri = imageUrl))
+            delay(2000L)
+            _uiState.update { it.copy(currentGame = databaseRepository.getGameById(gameId), isLoading = false) }
         }
     }
     
@@ -38,21 +41,10 @@ class GamesViewModel(private val databaseRepository: GamesDBRepository) : ViewMo
             databaseRepository.deleteGame(gameId)
         }
     }
-    
-    
-    companion object {
-        
-        val factory: ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                val application =
-                    (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as GameDiaryApplication)
-                GamesViewModel(application.container.gamesDBRepository)
-            }
-        }
-    }
 }
 
 data class GamesUiState(
     var gamesList: List<Game> = emptyList(),
+    var currentGame: Game? = null,
     var isLoading: Boolean = false
 )

@@ -13,6 +13,9 @@ interface GamesDAO {
     @Query("SELECT * FROM Games")
     fun getAllGames(): Flow<List<Game>>
     
+    @Query("SELECT * FROM Games WHERE id = :gameId")
+    suspend fun getGameById(gameId: Int): Game
+    
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertGame(game: Game)
     

@@ -13,9 +13,13 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.shrinkHorizontally
-import androidx.compose.foundation.*
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -38,17 +42,22 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.gamediary.GlobalViewModelProvider
 import com.example.gamediary.ui.theme.GameDiaryTheme
-import com.example.gamediary.ui.viewmodel.GamesViewModel
+import com.example.gamediary.ui.viewmodel.AddGameViewModel
+import com.example.gamediary.ui.viewmodel.FullTag
 import com.example.gamediary.utils.decodeBitmapFromUri
 
 @Composable
 fun AddGameScreen(
-    viewModel: GamesViewModel = viewModel(factory = GamesViewModel.factory),
+    viewModel: AddGameViewModel,
     navigateUp: () -> Unit,
+    changeBottomNavBarVisibility: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val flag = Intent.FLAG_GRANT_READ_URI_PERMISSION
+    val uiState = viewModel.uiState.collectAsState().value
+    uiState.selectedTags
     var gameNameTextField by rememberSaveable { mutableStateOf("") }
     var imageUri by rememberSaveable { mutableStateOf<Uri?>(null) }
     val photoPicker = rememberLauncherForActivityResult(PickVisualMedia()) { uri -> imageUri = uri }
@@ -85,8 +94,17 @@ fun AddGameScreen(
                     .fillMaxWidth()
             )
         }
-        Tags()
-        Button(onClick = { viewModel.addGame(gameNameTextField, imageUri.toString()); navigateUp() }) {
+        Tags(
+            viewModel = viewModel,
+            tagsList = uiState.tagsList,
+            selectedTags = uiState.selectedTags,
+            addTagToList = viewModel::addSelectedTagToList
+        )
+        Button(onClick = {
+            viewModel.addGame(gameNameTextField, imageUri.toString())
+            navigateUp()
+            viewModel.clearSelectedTags()
+        }) {
             Text("Add Game")
         }
     }
@@ -117,7 +135,7 @@ private fun GameImage(
             } else {
                 val context = LocalContext.current
                 Image(
-                    bitmap = decodeBitmapFromUri(context, imageUri),
+                    bitmap = decodeBitmapFromUri(context, imageUri)!!,
                     contentDescription = "",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
@@ -133,7 +151,13 @@ private fun GameImage(
 }
 
 @Composable
-private fun Tags(modifier: Modifier = Modifier) {
+private fun Tags(
+    viewModel: AddGameViewModel,
+    tagsList: List<FullTag>,
+    selectedTags: List<Int>,
+    addTagToList: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
     var isTagsClicked by remember { mutableStateOf(false) }
     val tagIconRotation by animateFloatAsState(targetValue = if (isTagsClicked) 225f else 0f, label = "tagIconRotation")
     Row(
@@ -166,19 +190,22 @@ private fun Tags(modifier: Modifier = Modifier) {
                     .animateContentSize(spring(stiffness = Spring.StiffnessLow))
                     .fillMaxWidth(if (isTagsClicked) 1f else 0f)
             ) {
-                items(5) {
-                    var isSelected by remember { mutableStateOf(false) }
+                items(tagsList, key = { it.tagId }) { tag ->
                     ElevatedFilterChip(
-                        selected = isSelected,
-                        onClick = { isSelected = !isSelected },
-                        label = { Text("RPG") },
+                        selected = selectedTags.contains(tag.tagId),
+                        onClick = { addTagToList(tag.tagId) },
+                        label = { Text(tag.tagName) },
                         trailingIcon = {
-                            Icon(imageVector = Icons.Default.Star, contentDescription = "")
+                            Icon(
+                                imageVector = tag.tagIcon ?: Icons.Default.Star,
+                                contentDescription = "${tag.tagName} icon"
+                            )
                         },
                         colors = FilterChipDefaults.elevatedFilterChipColors(
-                            containerColor = Color(0xffFF3401), selectedContainerColor = Color(0xffFC957C)
+                            containerColor = tag.containerColor,
+                            selectedContainerColor = tag.outlineColor
+                        
                         ),
-                        border = BorderStroke(4.dp, Color(0xffFC957C))
                     )
                 }
             }
@@ -192,8 +219,9 @@ private fun Tags(modifier: Modifier = Modifier) {
 fun AddGameScreen_Preview() {
     GameDiaryTheme {
         AddGameScreen(
+            viewModel = viewModel(factory = GlobalViewModelProvider.Factory),
             navigateUp = {},
-            modifier = Modifier
+            changeBottomNavBarVisibility = { }
         )
     }
 }

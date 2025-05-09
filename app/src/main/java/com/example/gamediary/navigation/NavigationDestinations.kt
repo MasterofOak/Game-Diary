@@ -31,7 +31,7 @@ object NavigationDestinations {
     }
     
     @Serializable
-    object GameDetailScreen
+    data class GameDetailScreen(val gameId: Int)
     
     @Serializable
     object AddGameScreen

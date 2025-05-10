@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.gamediary.data.tagsStyling
 import com.example.gamediary.database.GamesDBRepository
 import com.example.gamediary.model.Game
+import com.example.gamediary.model.GamesTags
 import com.example.gamediary.model.Tag
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -27,8 +28,12 @@ class AddGameViewModel(private val databaseRepository: GamesDBRepository) : View
     }
     
     fun addGame(gameName: String, imageUrl: String?) {
+        val tags = _uiState.value.selectedTags
         viewModelScope.launch {
-            databaseRepository.insertGame(game = Game(gameName = gameName, imageUri = imageUrl))
+            val gameId: Long = databaseRepository.insertGame(game = Game(gameName = gameName, imageUri = imageUrl))
+            for (tag in tags) {
+                databaseRepository.insertGamesTags(GamesTags(gameId = gameId.toInt(), tagId = tag))
+            }
         }
     }
     

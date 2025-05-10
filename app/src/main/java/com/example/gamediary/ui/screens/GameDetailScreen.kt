@@ -56,5 +56,6 @@ fun GameDetailScreen(
                 )
             )
         }
+        
     }
 }

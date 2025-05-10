@@ -5,7 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.navigation.compose.rememberNavController
-import com.example.gamediary.ui.screens.GameDiaryApp
+import com.example.gamediary.ui.GameDiaryApp
 import com.example.gamediary.ui.theme.GameDiaryTheme
 
 class MainActivity : ComponentActivity() {
@@ -16,7 +16,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             GameDiaryTheme {
                 val gameDiaryNavController = rememberNavController()
-                GameDiaryApp(navController = gameDiaryNavController)
+                GameDiaryApp(
+                    gameDiaryNavController = gameDiaryNavController
+                )
             }
         }
     }

@@ -52,7 +52,6 @@ import com.example.gamediary.utils.decodeBitmapFromUri
 fun AddGameScreen(
     viewModel: AddGameViewModel,
     navigateUp: () -> Unit,
-    changeBottomNavBarVisibility: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val flag = Intent.FLAG_GRANT_READ_URI_PERMISSION
@@ -94,7 +93,6 @@ fun AddGameScreen(
             )
         }
         Tags(
-            viewModel = viewModel,
             tagsList = uiState.tagsList,
             selectedTags = uiState.selectedTags,
             addTagToList = viewModel::addSelectedTagToList
@@ -151,7 +149,6 @@ private fun GameImage(
 
 @Composable
 private fun Tags(
-    viewModel: AddGameViewModel,
     tagsList: List<FullTag>,
     selectedTags: List<Int>,
     addTagToList: (Int) -> Unit,
@@ -224,7 +221,6 @@ fun AddGameScreen_Preview() {
         AddGameScreen(
             viewModel = viewModel(factory = GlobalViewModelProvider.Factory),
             navigateUp = {},
-            changeBottomNavBarVisibility = { }
         )
     }
 }

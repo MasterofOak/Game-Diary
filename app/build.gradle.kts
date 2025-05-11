@@ -19,16 +19,22 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
-        
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            isDebuggable = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+        debug {
+            isMinifyEnabled = false
+            isDebuggable = true
+            isShrinkResources = false
         }
     }
     compileOptions {
@@ -58,6 +64,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.room.ktx)
+    implementation(libs.coil.compose)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.runtime)
     testImplementation(libs.junit)

@@ -20,14 +20,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil3.compose.AsyncImage
 import com.example.gamediary.GlobalViewModelProvider
 import com.example.gamediary.R
 import com.example.gamediary.model.Game
@@ -36,9 +36,6 @@ import com.example.gamediary.ui.scaffold_base.ScaffoldBaseComposable
 import com.example.gamediary.ui.theme.GameDiaryTheme
 import com.example.gamediary.ui.viewmodel.GamesViewModel
 import com.example.gamediary.ui.viewmodel.toFullTag
-import com.example.gamediary.utils.decodeBitmapFromUri
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import kotlin.math.absoluteValue
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -118,15 +115,6 @@ private fun GameCard(
     onLongPress: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
-    var bitmapImage by remember { mutableStateOf<ImageBitmap?>(null) }
-    if (game.imageUri != null) {
-        LaunchedEffect(game.imageUri) {
-            withContext(Dispatchers.IO) {
-                bitmapImage = decodeBitmapFromUri(context, game.imageUri.toUri())
-            }
-        }
-    }
     Card(
         modifier = modifier
             .offset(y = animationOffset.dp)
@@ -137,36 +125,29 @@ private fun GameCard(
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(16.dp)) {
             with(sharedTransitionScope) {
-                if (bitmapImage != null) {
-                    Image(
-                        bitmap = bitmapImage!!,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .aspectRatio(1f)
-                            .clip(RoundedCornerShape(8.dp))
-                            .sharedElement(
-                                sharedTransitionScope.rememberSharedContentState(key = "image-${game.id}"),
-                                animatedContentScope
-                            )
-                    )
-                } else {
-                    Image(
-                        painter = painterResource(R.drawable.ai_slop_placeholder),
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .aspectRatio(1f)
-                            .clip(RoundedCornerShape(8.dp))
-                    )
-                }
-                Spacer(modifier = Modifier.size(32.dp))
+                AsyncImage(
+                    model = game.imageUri?.toUri(),
+                    contentDescription = null,
+                    error = painterResource(R.drawable.ai_slop_placeholder),
+                    placeholder = painterResource(R.drawable.ai_slop_placeholder),
+                    contentScale = ContentScale.Crop,
+                    filterQuality = FilterQuality.Low,
+                    modifier = Modifier
+                        .aspectRatio(1f)
+                        .clip(RoundedCornerShape(8.dp))
+                        .sharedElement(
+                            sharedTransitionScope.rememberSharedContentState(key = "image-${game.id}"),
+                            animatedContentScope
+                        )
+                )
+                Spacer(modifier = Modifier.size(16.dp))
                 Text(
                     game.gameName, modifier = Modifier.sharedElement(
                         sharedTransitionScope.rememberSharedContentState(key = "text-${game.id}"),
                         animatedContentScope
                     )
                 )
+                Spacer(modifier = Modifier.size(16.dp))
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier
@@ -192,7 +173,7 @@ fun GameScreen_Preview() {
             bottomBarComposable = {},
             modifier = Modifier
         ) {
-            SharedTransitionScope {
+            SharedTransitionLayout {
                 var state by remember { mutableStateOf(false) }
                 AnimatedContent(targetState = state) {
                     @SuppressLint("UnusedContentLambdaTargetStateParameter") it
@@ -200,7 +181,7 @@ fun GameScreen_Preview() {
                         viewModel = viewModel(factory = GlobalViewModelProvider.Factory),
                         onGameClicked = {},
                         onAddGameClicked = { },
-                        sharedTransitionScope = this@SharedTransitionScope,
+                        sharedTransitionScope = this@SharedTransitionLayout,
                         animatedContentScope = this,
                         modifier = Modifier.fillMaxSize()
                     )

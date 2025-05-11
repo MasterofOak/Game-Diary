@@ -152,7 +152,6 @@ fun NavGraphBuilder.gamesGraph(
             ) { innerPadding ->
                 AddGameScreen(
                     viewModel = addGameViewModel,
-                    changeBottomNavBarVisibility = { },
                     navigateUp = { navController.navigateUp() },
                     modifier = Modifier.padding(innerPadding)
                 )

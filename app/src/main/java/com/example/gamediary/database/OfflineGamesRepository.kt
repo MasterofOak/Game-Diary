@@ -17,6 +17,8 @@ class OfflineGamesRepository(private val gamesDAO: GamesDAO, private val tagsDAO
     
     override fun getAllTags(): Flow<List<Tag>> = tagsDAO.getAllTags()
     
+    override fun getTagsByGameId(gameId: Int): Flow<List<Tag>> = tagsDAO.getTagsByGameId(gameId)
+    
     override suspend fun insertTag(tag: Tag) = tagsDAO.insertTag(tag)
     
     override suspend fun insertGamesTags(gamesTags: GamesTags) = tagsDAO.insertGamesTags(gamesTags)

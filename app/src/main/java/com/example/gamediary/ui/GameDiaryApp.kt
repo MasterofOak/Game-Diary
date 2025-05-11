@@ -3,7 +3,9 @@ package com.example.gamediary.ui
 import androidx.compose.animation.*
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -23,6 +25,7 @@ import com.example.gamediary.ui.scaffold_base.FloatingActionsButtonsList
 import com.example.gamediary.ui.scaffold_base.ScaffoldBaseComposable
 import com.example.gamediary.ui.scaffold_base.TopNavBar
 import com.example.gamediary.ui.screens.*
+import com.example.gamediary.ui.theme.GameDiaryTheme
 import com.example.gamediary.ui.viewmodel.AddGameViewModel
 import com.example.gamediary.ui.viewmodel.GamesViewModel
 
@@ -57,7 +60,7 @@ fun NavGraphBuilder.gamesGraph(
             ScaffoldBaseComposable(
                 topBarComposable = {
                     TopNavBar(
-                        title = "Games",
+                        title = { Text("Games") },
                         isTopBarVisible = true,
                         canNavigateBack = navController.previousBackStackEntry != null,
                         navigateUp = { navController.navigateUp() }
@@ -90,23 +93,39 @@ fun NavGraphBuilder.gamesGraph(
         composable<NavigationDestinations.GameDetailScreen> { entry ->
             val gameId = entry.toRoute<NavigationDestinations.GameDetailScreen>().gameId
             gamesViewModel.setGame(gameId)
+            val gamesUiState = gamesViewModel.uiState.collectAsState().value
+            println(gamesUiState.currentGame!!)
             ScaffoldBaseComposable(
-                topBarComposable = {},
+                topBarComposable = {
+                    TopNavBar(
+                        title = {
+                            with(sharedTransitionScope) {
+                                Text(
+                                    gamesUiState.currentGame!!.gameName,
+                                    modifier = Modifier.sharedElement(
+                                        sharedTransitionScope.rememberSharedContentState(
+                                            key = "text-${gamesUiState.currentGame!!.id}"
+                                        ),
+                                        this@composable
+                                    )
+                                )
+                            }
+                        },
+                        isTopBarVisible = true,
+                        canNavigateBack = navController.previousBackStackEntry != null,
+                        navigateUp = { navController.navigateUp() }
+                    )
+                },
                 floatingActionButtonComposable = {
                     FloatingActionsButtonsList(
                         onGameFabClicked = { navController.navigate(NavigationDestinations.AddGameScreen) }
                     )
                 },
-                bottomBarComposable = {
-                    BottomNavBar(
-                        currentDestination = entry.destination,
-                        isBottomNavBarVisible = true,
-                        navigateTo = { navController.navigateBetweenBottomNavigation(it) }
-                    )
-                }
+                bottomBarComposable = {},
+                modifier = Modifier
             ) { innerPadding ->
                 GameDetailScreen(
-                    viewModel = gamesViewModel,
+                    game = gamesUiState.currentGame!!,
                     sharedTransitionScope,
                     this@composable,
                     modifier = Modifier.padding(innerPadding)
@@ -122,7 +141,7 @@ fun NavGraphBuilder.gamesGraph(
             ScaffoldBaseComposable(
                 topBarComposable = {
                     TopNavBar(
-                        title = "",
+                        title = { Text("") },
                         isTopBarVisible = true,
                         canNavigateBack = navController.previousBackStackEntry != null,
                         navigateUp = { navController.navigateUp() }
@@ -148,7 +167,7 @@ fun NavGraphBuilder.searchGraph(navController: NavHostController) {
             ScaffoldBaseComposable(
                 topBarComposable = {
                     TopNavBar(
-                        title = "Search",
+                        title = { Text("Search") },
                         isTopBarVisible = true,
                         canNavigateBack = navController.previousBackStackEntry != null,
                         navigateUp = { navController.navigateUp() }
@@ -179,7 +198,7 @@ fun NavGraphBuilder.feedGraph(navController: NavHostController) {
             ScaffoldBaseComposable(
                 topBarComposable = {
                     TopNavBar(
-                        title = "Feed",
+                        title = { Text("Feed") },
                         isTopBarVisible = true,
                         canNavigateBack = navController.previousBackStackEntry != null,
                         navigateUp = { navController.navigateUp() }
@@ -216,5 +235,7 @@ private fun NavHostController.navigateBetweenBottomNavigation(destination: Any) 
 @Preview
 @Composable
 fun GameDiaryApp_Preview() {
-    GameDiaryApp(rememberNavController())
+    GameDiaryTheme {
+        GameDiaryApp(rememberNavController())
+    }
 }

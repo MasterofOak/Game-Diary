@@ -19,6 +19,7 @@ interface GamesDBRepository {
      * [Tag] related database functions
      */
     fun getAllTags(): Flow<List<Tag>>
+    fun getTagsByGameId(gameId: Int): Flow<List<Tag>>
     suspend fun insertTag(tag: Tag)
     suspend fun insertGamesTags(gamesTags: GamesTags)
 }

@@ -57,7 +57,6 @@ fun AddGameScreen(
 ) {
     val flag = Intent.FLAG_GRANT_READ_URI_PERMISSION
     val uiState = viewModel.uiState.collectAsState().value
-    uiState.selectedTags
     var gameNameTextField by rememberSaveable { mutableStateOf("") }
     var imageUri by rememberSaveable { mutableStateOf<Uri?>(null) }
     val photoPicker = rememberLauncherForActivityResult(PickVisualMedia()) { uri -> imageUri = uri }
@@ -191,27 +190,31 @@ private fun Tags(
                     .fillMaxWidth(if (isTagsClicked) 1f else 0f)
             ) {
                 items(tagsList, key = { it.tagId }) { tag ->
-                    ElevatedFilterChip(
-                        selected = selectedTags.contains(tag.tagId),
-                        onClick = { addTagToList(tag.tagId) },
-                        label = { Text(tag.tagName) },
-                        trailingIcon = {
-                            Icon(
-                                imageVector = tag.tagIcon ?: Icons.Default.Star,
-                                contentDescription = "${tag.tagName} icon"
-                            )
-                        },
-                        colors = FilterChipDefaults.elevatedFilterChipColors(
-                            containerColor = tag.containerColor,
-                            selectedContainerColor = tag.outlineColor
-                        
-                        ),
-                    )
+                    Tag(tag, addTagToList, isSelected = { selectedTags.contains(it) })
                 }
             }
-            
         }
     }
+}
+
+@Composable
+fun Tag(tag: FullTag, addTagToList: (Int) -> Unit, isSelected: (Int) -> Boolean) {
+    ElevatedFilterChip(
+        selected = isSelected(tag.tagId),
+        onClick = { addTagToList(tag.tagId) },
+        label = { Text(tag.tagName) },
+        trailingIcon = {
+            Icon(
+                imageVector = tag.tagIcon ?: Icons.Default.Star,
+                contentDescription = "${tag.tagName} icon"
+            )
+        },
+        colors = FilterChipDefaults.elevatedFilterChipColors(
+            containerColor = tag.containerColor,
+            selectedContainerColor = tag.outlineColor
+        
+        ),
+    )
 }
 
 @Preview(showBackground = true)

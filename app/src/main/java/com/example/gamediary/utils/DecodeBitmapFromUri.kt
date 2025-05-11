@@ -7,7 +7,11 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 
 fun decodeBitmapFromUri(context: Context, imageUri: Uri): ImageBitmap? {
-    val source = ImageDecoder.createSource(context.contentResolver, imageUri)
-    val bitmap = ImageDecoder.decodeBitmap(source).asImageBitmap()
-    return bitmap
+    try {
+        val source = ImageDecoder.createSource(context.contentResolver, imageUri)
+        val bitmap = ImageDecoder.decodeBitmap(source).asImageBitmap()
+        return bitmap
+    } catch (e: Exception) {
+        return null
+    }
 }

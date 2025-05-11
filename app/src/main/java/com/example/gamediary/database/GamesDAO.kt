@@ -16,9 +16,6 @@ interface GamesDAO {
     @Query("SELECT * FROM Games WHERE id = :gameId")
     suspend fun getGameById(gameId: Int): Game
     
-    @Query("SELECT MAX(id) FROM Games")
-    suspend fun getLastInsertedId(): Long
-    
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertGame(game: Game): Long
     

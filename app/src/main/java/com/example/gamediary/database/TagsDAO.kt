@@ -14,9 +14,18 @@ interface TagsDAO {
     @Query("SELECT * FROM Tags")
     fun getAllTags(): Flow<List<Tag>>
     
+    @Query(
+        "SELECT T.id, T.tag_name " +
+                "FROM Tags T " +
+                "JOIN GamesTags GT ON T.id = GT.tagId " +
+                "WHERE GT.gameId = :gameId"
+    )
+    fun getTagsByGameId(gameId: Int): Flow<List<Tag>>
+    
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertTag(tag: Tag)
     
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertGamesTags(gamesTags: GamesTags)
+    
 }

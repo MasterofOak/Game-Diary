@@ -29,7 +29,6 @@ abstract class GameDiaryDatabase : RoomDatabase() {
             return Instance ?: synchronized(this) {
                 Room.databaseBuilder(context, GameDiaryDatabase::class.java, "game_diary")
                     .createFromAsset("database/game_diary.db")
-                    .fallbackToDestructiveMigration(true)
                     .build().also { Instance = it }
             }
         }

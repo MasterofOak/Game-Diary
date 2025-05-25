@@ -1,5 +1,6 @@
 package com.example.gamediary.model
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.ForeignKey.Companion.CASCADE
@@ -7,24 +8,24 @@ import androidx.room.Index
 
 @Entity(
     tableName = "GamesTags",
-    primaryKeys = ["gameId", "tagId"],
+    primaryKeys = ["game_id", "tag_id"],
     foreignKeys = [
         ForeignKey(
             entity = Game::class,
             parentColumns = ["id"],
-            childColumns = ["gameId"],
+            childColumns = ["game_id"],
             onDelete = CASCADE
         ),
         ForeignKey(
             entity = Tag::class,
             parentColumns = ["id"],
-            childColumns = ["tagId"],
+            childColumns = ["tag_id"],
             onDelete = CASCADE
         )
     ],
-    indices = [Index("gameId"), Index("tagId")]
+    indices = [Index("game_id"), Index("tag_id")]
 )
 data class GamesTags(
-    val gameId: Int,
-    val tagId: Int
+    @ColumnInfo(name = "game_id") val gameId: Int,
+    @ColumnInfo(name = "tag_id") val tagId: Int
 )

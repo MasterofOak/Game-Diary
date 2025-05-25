@@ -6,6 +6,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.gamediary.ui.viewmodel.AddGameViewModel
 import com.example.gamediary.ui.viewmodel.GamesViewModel
+import com.example.gamediary.ui.viewmodel.UserRecordViewModel
 
 object GlobalViewModelProvider {
     
@@ -15,6 +16,9 @@ object GlobalViewModelProvider {
         }
         initializer {
             AddGameViewModel(gameDiaryApplication().container.gamesDBRepository)
+        }
+        initializer {
+            UserRecordViewModel(gameDiaryApplication().container.gamesDBRepository)
         }
     }
 }

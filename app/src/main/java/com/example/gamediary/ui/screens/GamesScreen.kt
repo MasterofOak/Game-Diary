@@ -2,6 +2,7 @@ package com.example.gamediary.ui.screens
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.*
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -24,6 +25,7 @@ import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -71,7 +73,7 @@ fun GameScreen(
             GameCard(
                 game = game,
                 tagsList = gamesTags,
-                animationOffset = pageOffset * 30,
+                animationOffset = { pageOffset * 120 },
                 sharedTransitionScope,
                 animatedContentScope,
                 onGameClicked = onGameClicked,
@@ -108,7 +110,7 @@ private fun AddGameCard(onAddGameClicked: () -> Unit) {
 private fun GameCard(
     game: Game,
     tagsList: List<Tag>,
-    animationOffset: Float,
+    animationOffset: () -> Float,
     sharedTransitionScope: SharedTransitionScope,
     animatedContentScope: AnimatedContentScope,
     onGameClicked: (Int) -> Unit,
@@ -117,11 +119,13 @@ private fun GameCard(
 ) {
     Card(
         modifier = modifier
-            .offset(y = animationOffset.dp)
             .combinedClickable(
                 onClick = { onGameClicked(game.id) },
                 onLongClick = { onLongPress(game.id) }
             )
+            .offset {
+                IntOffset(0, animationOffset().toInt())
+            }
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(16.dp)) {
             with(sharedTransitionScope) {
@@ -137,12 +141,15 @@ private fun GameCard(
                         .clip(RoundedCornerShape(8.dp))
                         .sharedElement(
                             sharedTransitionScope.rememberSharedContentState(key = "image-${game.id}"),
-                            animatedContentScope
+                            animatedContentScope,
+                            boundsTransform = { initialRect, targetRect ->
+                                spring(dampingRatio = 1f, stiffness = 450f)
+                            }
                         )
                 )
                 Spacer(modifier = Modifier.size(16.dp))
                 Text(
-                    game.gameName, modifier = Modifier.sharedElement(
+                    game.gameName, modifier = Modifier.sharedBounds(
                         sharedTransitionScope.rememberSharedContentState(key = "text-${game.id}"),
                         animatedContentScope
                     )

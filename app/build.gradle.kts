@@ -10,6 +10,14 @@ room {
     schemaDirectory("$projectDir/schemas")
 }
 android {
+    signingConfigs {
+        create("release") {
+            keyAlias = "gd_release"
+            storeFile = file("C:\\Users\\youch\\Desktop\\GameDiaryKey.jks")
+            storePassword = "08092004_GameDiary"
+            keyPassword = "08092004_GameDiary"
+        }
+    }
     namespace = "com.example.gamediary"
     compileSdk = 35
     
@@ -20,6 +28,7 @@ android {
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        signingConfig = signingConfigs.getByName("debug")
     }
     buildTypes {
         release {
@@ -30,6 +39,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            
         }
         debug {
             isMinifyEnabled = false

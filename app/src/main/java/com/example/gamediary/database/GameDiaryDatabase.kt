@@ -4,23 +4,22 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.example.gamediary.model.Game
-import com.example.gamediary.model.GamesTags
-import com.example.gamediary.model.Tag
+import com.example.gamediary.model.*
 
 @Database(
     version = GameDiaryDatabase.LATEST_VERSION,
-    entities = [Game::class, Tag::class, GamesTags::class],
+    entities = [Game::class, Tag::class, GamesTags::class, TextRecord::class, ImageRecord::class, VideoRecord::class],
     exportSchema = true
 )
 abstract class GameDiaryDatabase : RoomDatabase() {
     
     abstract fun gamesDao(): GamesDAO
     abstract fun tagsDao(): TagsDAO
+    abstract fun userRecordsDao(): UserRecordsDAO
     
     companion object {
         
-        const val LATEST_VERSION = 4
+        const val LATEST_VERSION = 6
         
         @Volatile
         private var Instance: GameDiaryDatabase? = null

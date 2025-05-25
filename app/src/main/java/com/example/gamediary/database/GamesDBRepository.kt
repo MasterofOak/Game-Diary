@@ -1,14 +1,12 @@
 package com.example.gamediary.database
 
-import com.example.gamediary.model.Game
-import com.example.gamediary.model.GamesTags
-import com.example.gamediary.model.Tag
+import com.example.gamediary.model.*
 import kotlinx.coroutines.flow.Flow
 
 interface GamesDBRepository {
     
     /**
-     *  [Game] related database functions
+     *  [Game] related database operations
      */
     fun getAllGames(): Flow<List<Game>>
     suspend fun getGameById(gameId: Int): Game
@@ -16,10 +14,23 @@ interface GamesDBRepository {
     suspend fun deleteGame(gameId: Int)
     
     /**
-     * [Tag] related database functions
+     * [Tag] related database operations
      */
     fun getAllTags(): Flow<List<Tag>>
     fun getTagsByGameId(gameId: Int): Flow<List<Tag>>
     suspend fun insertTag(tag: Tag)
     suspend fun insertGamesTags(gamesTags: GamesTags)
+    
+    /**
+     * [Records] related database operations
+     */
+    fun getAllTextRecords(gameId: Int): Flow<List<TextRecord>>
+    
+    suspend fun insertTextRecord(textRecord: TextRecord)
+    suspend fun insertImageRecord(imageRecord: ImageRecord)
+    suspend fun insertVideoRecord(videoRecord: VideoRecord)
+    
+    suspend fun deleteTextRecord(textRecord: TextRecord)
+    suspend fun deleteImageRecord(imageRecord: ImageRecord)
+    suspend fun deleteVideoRecord(videoRecord: VideoRecord)
 }

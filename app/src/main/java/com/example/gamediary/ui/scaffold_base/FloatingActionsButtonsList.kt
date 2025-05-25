@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Notes
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.VideogameAsset
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -23,14 +24,14 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun FloatingActionsButtonsList(onGameFabClicked: () -> Unit) {
+fun FloatingActionsButtonsList(onGameFabClicked: () -> Unit, onTextRecordFabClicked: () -> Unit) {
     var isFabClicked by remember { mutableStateOf(false) }
     val fabIconRotation by animateFloatAsState(targetValue = if (isFabClicked) 45f else 0f, label = "FABRotation")
     LazyColumn(
         modifier = Modifier,
         horizontalAlignment = Alignment.End
     ) {
-        items(2) {
+        items(1) {
             AnimatedVisibility(
                 isFabClicked,
                 enter = scaleIn(),
@@ -40,6 +41,22 @@ fun FloatingActionsButtonsList(onGameFabClicked: () -> Unit) {
                     Text("Something")
                     Spacer(modifier = Modifier.size(4.dp))
                     Icon(imageVector = Icons.Default.Add, "Add" + " Button")
+                }
+            }
+        }
+        item {
+            AnimatedVisibility(
+                isFabClicked,
+                enter = scaleIn(),
+                exit = scaleOut()
+            ) {
+                ExtendedFloatingActionButton(
+                    onClick = { onTextRecordFabClicked(); isFabClicked = !isFabClicked }, modifier = Modifier
+                        .padding(4.dp)
+                ) {
+                    Text("Text Record")
+                    Spacer(modifier = Modifier.size(8.dp))
+                    Icon(imageVector = Icons.AutoMirrored.Filled.Notes, "Add Text Record Action Button")
                 }
             }
         }

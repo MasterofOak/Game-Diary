@@ -17,8 +17,8 @@ interface TagsDAO {
     @Query(
         "SELECT T.id, T.tag_name " +
                 "FROM Tags T " +
-                "JOIN GamesTags GT ON T.id = GT.tagId " +
-                "WHERE GT.gameId = :gameId"
+                "JOIN GamesTags GT ON T.id = GT.tag_id " +
+                "WHERE GT.game_id = :gameId"
     )
     fun getTagsByGameId(gameId: Int): Flow<List<Tag>>
     

@@ -1,14 +1,13 @@
 package com.example.gamediary.ui.scaffold_base
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.*
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination
@@ -20,12 +19,13 @@ import com.example.gamediary.navigation.BottomNavigationItems
 fun BottomNavBar(
     currentDestination: NavDestination?,
     isBottomNavBarVisible: Boolean,
-    navigateTo: (destination: Any) -> Unit
+    navigateTo: (destination: Any) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     AnimatedVisibility(
         isBottomNavBarVisible,
-        enter = slideInVertically(initialOffsetY = { it / 2 }),
-        exit = slideOutVertically(targetOffsetY = { it / 2 })
+        enter = fadeIn() + slideInVertically { it },
+        exit = fadeOut() + slideOutVertically { it },
     ) {
         NavigationBar(windowInsets = WindowInsets(bottom = 8.dp)) {
             BottomNavigationItems.entries.forEach { item ->

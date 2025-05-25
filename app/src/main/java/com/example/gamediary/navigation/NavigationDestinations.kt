@@ -10,6 +10,7 @@ import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.VideogameAsset
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.example.gamediary.R
+import com.example.gamediary.model.RecordType
 import kotlinx.serialization.Serializable
 
 object NavigationGraphs {
@@ -35,6 +36,9 @@ object NavigationDestinations {
     
     @Serializable
     object AddGameScreen
+    
+    @Serializable
+    data class AddUserRecordScreen(val recordType: RecordType)
     
     @Serializable
     object SearchScreen

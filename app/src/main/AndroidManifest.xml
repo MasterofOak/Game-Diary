@@ -2,6 +2,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+
     <application
         android:name=".GameDiaryApplication"
         android:allowBackup="true"
@@ -14,6 +21,15 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.GameDiary"
         tools:targetApi="31">
+        <provider
+            android:name="com.masterofoak.gamediary.MyFileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -25,5 +41,5 @@
             </intent-filter>
         </activity>
     </application>
-
+    <!--            android:name="androidx.core.content.FileProvider"-->
 </manifest>

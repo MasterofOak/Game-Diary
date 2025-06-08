@@ -18,11 +18,11 @@ android {
             keyPassword = "08092004_GameDiary"
         }
     }
-    namespace = "com.example.gamediary"
+    namespace = "com.masterofoak.gamediary"
     compileSdk = 35
     
     defaultConfig {
-        applicationId = "com.example.gamediary"
+        applicationId = "com.masterofoak.gamediary"
         minSdk = 30
         targetSdk = 35
         versionCode = 1
@@ -75,6 +75,10 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.room.ktx)
     implementation(libs.coil.compose)
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.exoplayer.dash)
+    implementation(libs.androidx.media3.ui)
+    implementation(libs.androidx.media3.ui.compose)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.runtime)
     testImplementation(libs.junit)

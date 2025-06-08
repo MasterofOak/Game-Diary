@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 6,
-    "identityHash": "88a4ed324e438c2491639b498e470375",
+    "identityHash": "42713f3a8b64bb1630c574e359eec5bb",
     "entities": [
       {
         "tableName": "Games",
@@ -35,7 +35,7 @@
       },
       {
         "tableName": "Tags",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `tag_name` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `tag_name` TEXT NOT NULL, `is_custom_tag` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -47,6 +47,12 @@
             "fieldPath": "tagName",
             "columnName": "tag_name",
             "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isCustomTag",
+            "columnName": "is_custom_tag",
+            "affinity": "INTEGER",
             "notNull": true
           }
         ],
@@ -131,7 +137,7 @@
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`textRId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `game_id` INTEGER NOT NULL, `content` TEXT NOT NULL, `style_ranges` TEXT NOT NULL, `created_at` INTEGER NOT NULL, `last_edited_at` INTEGER, FOREIGN KEY(`game_id`) REFERENCES `Games`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
-            "fieldPath": "textRId",
+            "fieldPath": "id",
             "columnName": "textRId",
             "affinity": "INTEGER",
             "notNull": true
@@ -330,7 +336,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '88a4ed324e438c2491639b498e470375')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '42713f3a8b64bb1630c574e359eec5bb')"
     ]
   }
 }

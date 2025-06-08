@@ -1,4 +1,5 @@
 plugins {
+    signing
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
@@ -13,9 +14,9 @@ android {
     signingConfigs {
         create("release") {
             keyAlias = "gd_release"
-            storeFile = file("C:\\Users\\youch\\Desktop\\GameDiaryKey.jks")
-            storePassword = "08092004_GameDiary"
-            keyPassword = "08092004_GameDiary"
+            storeFile = file(rootProject.extra["keyFilePath"] as String)
+            storePassword = rootProject.extra["storePassword"] as String
+            keyPassword = rootProject.extra["keyPassword"] as String
         }
     }
     namespace = "com.masterofoak.gamediary"

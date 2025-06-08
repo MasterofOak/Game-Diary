@@ -216,6 +216,7 @@ fun NavGraphBuilder.gamesGraph(
                     game = gamesUiState.currentGame!!,
                     getAllTextRecords = userRecordViewModel::getAllTextRecords,
                     getAllImageRecords = userRecordViewModel::getAllImageRecords,
+                    getAllVideoRecords = userRecordViewModel::getAllVideoRecords,
                     sharedTransitionScope,
                     this@composable,
                     modifier = Modifier.padding(innerPadding)

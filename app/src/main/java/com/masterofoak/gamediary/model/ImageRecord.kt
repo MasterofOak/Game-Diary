@@ -2,7 +2,6 @@ package com.masterofoak.gamediary.model
 
 import androidx.room.*
 import androidx.room.ForeignKey.Companion.CASCADE
-import com.masterofoak.gamediary.ui.screens.Records
 
 @Entity(
     tableName = "ImageRecords",

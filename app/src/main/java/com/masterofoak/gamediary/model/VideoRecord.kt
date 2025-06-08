@@ -2,7 +2,6 @@ package com.masterofoak.gamediary.model
 
 import androidx.room.*
 import androidx.room.ForeignKey.Companion.CASCADE
-import com.masterofoak.gamediary.ui.screens.Records
 
 @Entity(
     tableName = "VideoRecords",
@@ -25,6 +24,6 @@ data class VideoRecord(
 ) : Records {
     
     @Ignore
-    override val recordType: RecordType = RecordType.TEXT
+    override val recordType: RecordType = RecordType.VIDEO
     
 }

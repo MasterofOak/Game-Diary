@@ -3,21 +3,22 @@ package com.masterofoak.gamediary.ui.screens
 import androidx.compose.animation.*
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropUp
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
@@ -29,11 +30,19 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.net.toUri
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.ui.PlayerView
 import coil3.compose.AsyncImage
 import com.masterofoak.gamediary.R
 import com.masterofoak.gamediary.model.*
 import com.masterofoak.gamediary.ui.theme.GameDiaryTheme
+import com.masterofoak.gamediary.ui.viewmodel.VideoPlayerViewModel
 import com.masterofoak.gamediary.utils.buildAnnotatedStringHelper
 import com.masterofoak.gamediary.utils.getFormatedDate
 import com.masterofoak.gamediary.utils.getFormatedDateWithHours
@@ -41,27 +50,21 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.json.Json
 
 
-interface Records {
-    
-    val id: Int
-    val createdAt: Long
-    val recordType: RecordType
-    
-}
-
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun GameDetailScreen(
     game: Game,
     getAllTextRecords: (Int) -> Flow<List<TextRecord>>,
     getAllImageRecords: (Int) -> Flow<List<ImageRecord>>,
+    getAllVideoRecords: (Int) -> Flow<List<VideoRecord>>,
     sharedTransitionScope: SharedTransitionScope,
     animatedContentScope: AnimatedContentScope,
     modifier: Modifier = Modifier
 ) {
     val textRecordsList by getAllTextRecords(game.id).collectAsState(initial = emptyList())
     val imageRecordsList by getAllImageRecords(game.id).collectAsState(initial = emptyList())
-    val recordsList = (textRecordsList + imageRecordsList)
+    val videoRecordsList by getAllVideoRecords(game.id).collectAsState(initial = emptyList())
+    val recordsList = (textRecordsList + imageRecordsList + videoRecordsList)
         .groupBy {
             val formatedDate = getFormatedDate(it.createdAt)
             return@groupBy formatedDate
@@ -165,7 +168,7 @@ fun GameDetailScreen(
                             when (record.recordType) {
                                 RecordType.TEXT -> TextRecordComposable(record as TextRecord)
                                 RecordType.IMAGE -> ImageRecordComposable(record as ImageRecord)
-                                else -> ""
+                                RecordType.VIDEO -> VideoRecordComposable(record as VideoRecord)
                             }
                         }
                     }
@@ -211,6 +214,85 @@ private fun ImageRecordComposable(imageRecord: ImageRecord, modifier: Modifier =
         }
     }
 }
+
+@androidx.annotation.OptIn(UnstableApi::class)
+@Composable
+private fun VideoRecordComposable(videoRecord: VideoRecord, modifier: Modifier = Modifier) {
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(vertical = 8.dp)) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(256.dp)
+                .aspectRatio(16f / 9f)
+        ) {
+            val context = LocalContext.current
+            val lifecycleOwner = LocalLifecycleOwner.current
+            
+            // Initialize ExoPlayer and remember it across recompositions
+            val videoPlayerViewModel: VideoPlayerViewModel = viewModel(
+                key = "${videoRecord.videoUri}_${videoRecord.createdAt}"
+            )
+            
+            DisposableEffect(videoRecord.videoUri) {
+                videoPlayerViewModel.setVideoUrl(videoRecord.videoUri)
+                onDispose { }
+            }
+            DisposableEffect(lifecycleOwner, videoPlayerViewModel.exoPlayer) {
+                videoPlayerViewModel.setVideoUrl(videoRecord.videoUri)
+                val observer = LifecycleEventObserver { _, event ->
+                    when (event) {
+                        Lifecycle.Event.ON_STOP -> {
+                            videoPlayerViewModel.exoPlayer.pause()
+                        }
+                        
+                        Lifecycle.Event.ON_DESTROY -> {
+                            videoPlayerViewModel.exoPlayer.release()
+                        }
+                        
+                        else -> {}
+                    }
+                }
+                lifecycleOwner.lifecycle.addObserver(observer)
+                
+                // Clean up the observer when the composable leaves the composition
+                onDispose {
+                    lifecycleOwner.lifecycle.removeObserver(observer)
+                }
+            }
+            AndroidView(
+                factory = { ctx ->
+                    PlayerView(ctx).apply {
+                        player = videoPlayerViewModel.exoPlayer
+                        useController = true
+                        controllerShowTimeoutMs = 2000
+                        setShowPreviousButton(false)
+                        setShowNextButton(false)
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black)
+            )
+            Text(
+                text = "created at: " +
+                        getFormatedDateWithHours(timestamp = videoRecord.createdAt, context = context),
+                color = Color.Gray,
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
+    }
+}
+
+
+@Composable
+internal fun Modifier.noRippleClickable(onClick: () -> Unit): Modifier =
+    clickable(
+        interactionSource = remember { MutableInteractionSource() },
+        indication = null, // to prevent the ripple from the tap
+    ) {
+        onClick()
+    }
+
 //@Composable
 //private fun TextRecordComposable(textRecord: TextRecord, modifier: Modifier = Modifier) {
 //    var isDropDownClicked by remember { mutableStateOf(false) }

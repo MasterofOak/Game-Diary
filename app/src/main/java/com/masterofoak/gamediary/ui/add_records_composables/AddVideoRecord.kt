@@ -1,6 +1,7 @@
 package com.masterofoak.gamediary.ui.add_records_composables
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -25,6 +26,7 @@ import com.masterofoak.gamediary.utils.getUriForFile
 @Composable
 fun AddVideoRecord(updateState: (String) -> Unit) {
     val context = LocalContext.current
+    val flag = Intent.FLAG_GRANT_READ_URI_PERMISSION
     var capturedVideoUri by remember { mutableStateOf<Uri?>(null) }
     LaunchedEffect(capturedVideoUri) {
         if (capturedVideoUri != null) {
@@ -32,11 +34,12 @@ fun AddVideoRecord(updateState: (String) -> Unit) {
             println("Link updated")
         }
     }
-    val pickPhotoLauncher = rememberLauncherForActivityResult(
+    val pickVideoLauncher = rememberLauncherForActivityResult(
         contract = PickVisualMedia()
     ) { uri ->
         if (uri != null) {
             capturedVideoUri = uri
+            context.contentResolver.takePersistableUriPermission(uri, flag)
         }
     }
     val cameraLauncher = rememberLauncherForActivityResult(
@@ -70,7 +73,7 @@ fun AddVideoRecord(updateState: (String) -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable {
-                    pickPhotoLauncher.launch(PickVisualMediaRequest(PickVisualMedia.VideoOnly))
+                    pickVideoLauncher.launch(PickVisualMediaRequest(PickVisualMedia.VideoOnly))
                 },
             verticalAlignment = Alignment.CenterVertically
         ) {

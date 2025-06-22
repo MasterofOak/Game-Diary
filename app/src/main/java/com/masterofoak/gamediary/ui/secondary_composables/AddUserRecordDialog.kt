@@ -1,32 +1,29 @@
 package com.masterofoak.gamediary.ui.secondary_composables
 
 import androidx.compose.animation.*
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Sos
-import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.FilterQuality
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
-import androidx.core.net.toUri
-import coil3.compose.AsyncImage
-import com.masterofoak.gamediary.R
 import com.masterofoak.gamediary.model.*
+import com.masterofoak.gamediary.model.db_entities.ImageRecord
+import com.masterofoak.gamediary.model.db_entities.TextRecord
+import com.masterofoak.gamediary.model.db_entities.VideoRecord
 import com.masterofoak.gamediary.ui.add_records_composables.AddImageRecord
 import com.masterofoak.gamediary.ui.add_records_composables.AddTextRecord
 import com.masterofoak.gamediary.ui.add_records_composables.AddVideoRecord
 import com.masterofoak.gamediary.ui.viewmodel.UserRecordViewModel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.json.Json
 
 
@@ -34,6 +31,8 @@ import kotlinx.serialization.json.Json
 fun AddUserRecordDialog(
     userRecordViewModel: UserRecordViewModel,
     recordType: RecordType,
+    isUpdateMode: Boolean,
+    recordToUpdate: Records?,
     onDialogDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -56,14 +55,27 @@ fun AddUserRecordDialog(
                     if (currentStep != 2) {
                         currentStep += 1
                         when (recordType) {
-                            RecordType.TEXT -> userRecordViewModel.addTextRecords(
-                                TextRecord(
-                                    gameId = userRecordUiState.currentlySelectedGameId!!,
-                                    content = userRecordUiState.textContent!!,
-                                    styleRanges = Json.encodeToString(userRecordUiState.styleRanges),
-                                    createdAt = System.currentTimeMillis()
-                                )
-                            )
+                            RecordType.TEXT ->
+                                if (!isUpdateMode) {
+                                    userRecordViewModel.addTextRecords(
+                                        TextRecord(
+                                            gameId = userRecordUiState.currentlySelectedGameId!!,
+                                            content = userRecordUiState.textContent!!,
+                                            styleRanges = Json.encodeToString(userRecordUiState.styleRanges),
+                                            createdAt = System.currentTimeMillis()
+                                        )
+                                    )
+                                } else {
+                                    println("I am here")
+                                    val textRecord = recordToUpdate as TextRecord
+                                    userRecordViewModel.updateTextRecord(
+                                        textRecord.copy(
+                                            content = userRecordUiState.textContent!!,
+                                            styleRanges = Json.encodeToString(userRecordUiState.styleRanges),
+                                            lastEditedAt = System.currentTimeMillis()
+                                        )
+                                    )
+                                }
                             
                             RecordType.IMAGE -> userRecordViewModel.addImageRecords(
                                 ImageRecord(
@@ -86,9 +98,10 @@ fun AddUserRecordDialog(
                         userRecordViewModel.resetUiState()
                     }
                 },
-                enabled = userRecordUiState.textContent != null ||
-                        userRecordUiState.imageUri != null ||
-                        userRecordUiState.videoUri != null
+                enabled = (userRecordUiState.currentlySelectedGameId != null) &&
+                        (userRecordUiState.textContent != null ||
+                                userRecordUiState.imageUri != null ||
+                                userRecordUiState.videoUri != null)
             ) {
                 Text(confirmButtonText)
             }
@@ -118,14 +131,20 @@ fun AddUserRecordDialog(
                 {
                     when (recordType) {
                         RecordType.TEXT -> AddTextRecord(
-                            updateState = userRecordViewModel::updateTextRecordState
+                            recordToUpdate = if (recordToUpdate != null) recordToUpdate as TextRecord else null,
+                            updateState = userRecordViewModel::updateTextRecordState,
                         )
                         
                         RecordType.IMAGE -> AddImageRecord(
+                            gameString = "id${userRecordUiState.currentlySelectedGameId}_" +
+                                    "${userRecordUiState.currentlySelectedGameName}",
                             updateState = userRecordViewModel::updateImageRecordState
                         )
                         
                         RecordType.VIDEO -> AddVideoRecord(
+                            gameString =
+                                "id${userRecordUiState.currentlySelectedGameId}_" +
+                                        "${userRecordUiState.currentlySelectedGameName}",
                             updateState = userRecordViewModel::updateVideoRecordState
                         )
                     }
@@ -141,7 +160,7 @@ fun AddUserRecordDialog(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Sos,
+                            imageVector = Icons.Default.CheckCircle,
                             contentDescription = null,
                             modifier = Modifier.fillMaxSize(0.5f)
                         )
@@ -153,52 +172,4 @@ fun AddUserRecordDialog(
         properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false),
         modifier = modifier
     )
-}
-
-
-@Composable
-private fun Picker(getAllGames: () -> Flow<List<Game>>) {
-    val gamesList by getAllGames().collectAsState(initial = emptyList())
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(3),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier.fillMaxHeight(0.9f)
-    ) {
-        items(gamesList) { game ->
-            var isClicked by remember { mutableStateOf(false) }
-            Card(
-                modifier = Modifier
-                    .height(128.dp)
-                    .clickable { isClicked = !isClicked },
-                colors = CardDefaults.cardColors(
-                    containerColor =
-                        if (isClicked) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.error
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp, pressedElevation = 8.dp)
-            ) {
-                Column(
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(8.dp)
-                ) {
-                    AsyncImage(
-                        model = game.imageUri?.toUri() ?: R.drawable.ai_slop_placeholder,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        filterQuality = FilterQuality.Low,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(8.dp))
-                            .aspectRatio(1f)
-                    )
-                    Spacer(modifier = Modifier.size(8.dp))
-                    Text(game.gameName)
-                }
-            }
-            
-        }
-    }
 }

@@ -6,6 +6,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.masterofoak.gamediary.ui.viewmodel.AddGameViewModel
 import com.masterofoak.gamediary.ui.viewmodel.GamesViewModel
+import com.masterofoak.gamediary.ui.viewmodel.SearchViewModel
 import com.masterofoak.gamediary.ui.viewmodel.UserRecordViewModel
 
 object GlobalViewModelProvider {
@@ -19,6 +20,9 @@ object GlobalViewModelProvider {
         }
         initializer {
             UserRecordViewModel(gameDiaryApplication().container.gamesDBRepository)
+        }
+        initializer {
+            SearchViewModel(gameDiaryApplication().container.gamesDBRepository)
         }
     }
 }

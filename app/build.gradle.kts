@@ -21,7 +21,6 @@ android {
     }
     namespace = "com.masterofoak.gamediary"
     compileSdk = 35
-    
     defaultConfig {
         applicationId = "com.masterofoak.gamediary"
         minSdk = 30
@@ -40,7 +39,6 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            
         }
         debug {
             isMinifyEnabled = false
@@ -75,11 +73,12 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.room.ktx)
-    implementation(libs.coil.compose)
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.exoplayer.dash)
     implementation(libs.androidx.media3.ui)
     implementation(libs.androidx.media3.ui.compose)
+    implementation(libs.coil.compose)
+    implementation(libs.coil3.coil.gif)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.runtime)
     testImplementation(libs.junit)

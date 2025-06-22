@@ -1,7 +1,9 @@
-package com.masterofoak.gamediary.model
+package com.masterofoak.gamediary.model.db_entities
 
 import androidx.room.*
 import androidx.room.ForeignKey.Companion.CASCADE
+import com.masterofoak.gamediary.model.RecordType
+import com.masterofoak.gamediary.model.Records
 
 @Entity(
     tableName = "TextRecords",

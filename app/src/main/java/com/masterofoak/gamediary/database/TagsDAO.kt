@@ -4,8 +4,8 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.masterofoak.gamediary.model.GamesTags
-import com.masterofoak.gamediary.model.Tag
+import com.masterofoak.gamediary.model.db_entities.GamesTags
+import com.masterofoak.gamediary.model.db_entities.Tag
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -22,10 +22,12 @@ interface TagsDAO {
     )
     fun getTagsByGameId(gameId: Int): Flow<List<Tag>>
     
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTag(tag: Tag)
     
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertGamesTags(gamesTags: GamesTags)
     
+    @Query("INSERT INTO tags_fts(rowid, tag_name) SELECT id, tag_name FROM Tags")
+    suspend fun insertTagsIntoFts()
 }

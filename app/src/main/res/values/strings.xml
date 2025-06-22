@@ -5,8 +5,6 @@
     <string name="game_btn_label">Games</string>
     <string name="search_btn_label">Search</string>
     <string name="search_btn_icon_name">Search Button</string>
-    <string name="feed_btn_label">Feed</string>
-    <string name="feed_btn_icon_name">Feed Button</string>
     <!--    Navigation Bar related strings    -->
 
 </resources>

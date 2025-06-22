@@ -26,18 +26,24 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import coil3.compose.AsyncImage
 import com.masterofoak.gamediary.R
-import com.masterofoak.gamediary.model.Game
+import com.masterofoak.gamediary.model.db_entities.Game
 import com.masterofoak.gamediary.ui.viewmodel.UserRecordUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GamesDropDown(
     userRecordUiState: UserRecordUiState,
-    setGame: (Int?, String?) -> Unit,
+    setGame: (Int?, String?, String?) -> Unit,
     gamesList: List<Game>
 ) {
     val elementsHeight = 48.dp
-    var textFieldValue by remember { mutableStateOf(TextFieldValue("No selection")) }
+    var textFieldValue by remember {
+        mutableStateOf(
+            TextFieldValue(
+                userRecordUiState.currentlySelectedGameName ?: "No selection"
+            )
+        )
+    }
     var expanded by remember { mutableStateOf(false) }
     val dropDownRotation by animateFloatAsState(
         targetValue = if (expanded) 180f else 0f, label = "DropDownArrowRotation"
@@ -103,7 +109,7 @@ fun GamesDropDown(
                         onClick = {
                             expanded = false
                             textFieldValue = textFieldValue.copy("No selection")
-                            setGame(null, null)
+                            setGame(null, null, null)
                         },
                         modifier = Modifier
                             .weight(1f)
@@ -116,7 +122,7 @@ fun GamesDropDown(
                         onClick = {
                             expanded = false
                             textFieldValue = textFieldValue.copy(it.gameName)
-                            setGame(it.id, it.imageUri)
+                            setGame(it.id, it.imageUri, it.gameName)
                         },
                         leadingIcon = {
                             DropDownImageIcon(it.imageUri?.toUri())
@@ -153,7 +159,7 @@ fun GamesDropDown_Preview() {
     Surface {
         GamesDropDown(
             UserRecordUiState(),
-            setGame = { arg1, arg -> },
+            setGame = { arg2, arg1, arg -> },
             listOf<Game>()
         )
     }

@@ -1,6 +1,6 @@
 package com.masterofoak.gamediary.data
 
-import com.masterofoak.gamediary.model.Game
+import com.masterofoak.gamediary.model.db_entities.Game
 
 object FakeGamesData {
     

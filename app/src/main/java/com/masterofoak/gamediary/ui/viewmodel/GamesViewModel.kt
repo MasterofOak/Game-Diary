@@ -2,10 +2,9 @@ package com.masterofoak.gamediary.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.masterofoak.gamediary.data.FakeGamesData
 import com.masterofoak.gamediary.database.GamesDBRepository
-import com.masterofoak.gamediary.model.Game
-import com.masterofoak.gamediary.model.Tag
+import com.masterofoak.gamediary.model.db_entities.Game
+import com.masterofoak.gamediary.model.db_entities.Tag
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -18,11 +17,7 @@ class GamesViewModel(private val databaseRepository: GamesDBRepository) : ViewMo
     init {
         viewModelScope.launch {
             databaseRepository.getAllGames().collectLatest { games ->
-                if (!games.isEmpty()) {
-                    _uiState.value = GamesUiState(gamesList = games)
-                } else {
-                    _uiState.value = GamesUiState(gamesList = FakeGamesData.games)
-                }
+                _uiState.value = GamesUiState(gamesList = games)
             }
         }
     }
@@ -44,6 +39,7 @@ class GamesViewModel(private val databaseRepository: GamesDBRepository) : ViewMo
     
     fun deleteGame(gameId: Int) {
         viewModelScope.launch {
+            delay(1000L)
             databaseRepository.deleteGame(gameId)
         }
     }

@@ -1,0 +1,507 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 8,
+    "identityHash": "a2859c844a2f70b9d2ce73c0826bc4cf",
+    "entities": [
+      {
+        "tableName": "Games",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `game_name` TEXT NOT NULL, `image_uri` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "gameName",
+            "columnName": "game_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "imageUri",
+            "columnName": "image_uri",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "Tags",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `tag_name` TEXT NOT NULL, `is_custom_tag` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tagName",
+            "columnName": "tag_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isCustomTag",
+            "columnName": "is_custom_tag",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "GamesTags",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`game_id` INTEGER NOT NULL, `tag_id` INTEGER NOT NULL, PRIMARY KEY(`game_id`, `tag_id`), FOREIGN KEY(`game_id`) REFERENCES `Games`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`tag_id`) REFERENCES `Tags`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "gameId",
+            "columnName": "game_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tagId",
+            "columnName": "tag_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "game_id",
+            "tag_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_GamesTags_game_id",
+            "unique": false,
+            "columnNames": [
+              "game_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_GamesTags_game_id` ON `${TABLE_NAME}` (`game_id`)"
+          },
+          {
+            "name": "index_GamesTags_tag_id",
+            "unique": false,
+            "columnNames": [
+              "tag_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_GamesTags_tag_id` ON `${TABLE_NAME}` (`tag_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "Games",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "game_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "Tags",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "tag_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "TextRecords",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`textRId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `game_id` INTEGER NOT NULL, `content` TEXT NOT NULL, `style_ranges` TEXT NOT NULL, `created_at` INTEGER NOT NULL, `last_edited_at` INTEGER, FOREIGN KEY(`game_id`) REFERENCES `Games`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "textRId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "gameId",
+            "columnName": "game_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "content",
+            "columnName": "content",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "styleRanges",
+            "columnName": "style_ranges",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "created_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastEditedAt",
+            "columnName": "last_edited_at",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "textRId"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_TextRecords_game_id",
+            "unique": false,
+            "columnNames": [
+              "game_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_TextRecords_game_id` ON `${TABLE_NAME}` (`game_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "Games",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "game_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "ImageRecords",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`imageRId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `game_id` INTEGER NOT NULL, `image_uri` TEXT NOT NULL, `created_at` INTEGER NOT NULL, `last_edited_at` INTEGER, FOREIGN KEY(`game_id`) REFERENCES `Games`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "imageRId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "gameId",
+            "columnName": "game_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "imageUri",
+            "columnName": "image_uri",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "created_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastEditedAt",
+            "columnName": "last_edited_at",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "imageRId"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_ImageRecords_game_id",
+            "unique": false,
+            "columnNames": [
+              "game_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ImageRecords_game_id` ON `${TABLE_NAME}` (`game_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "Games",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "game_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "VideoRecords",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`videoRId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `game_id` INTEGER NOT NULL, `video_uri` TEXT NOT NULL, `created_at` INTEGER NOT NULL, `last_edited_at` INTEGER, FOREIGN KEY(`game_id`) REFERENCES `Games`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "videoRId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "gameId",
+            "columnName": "game_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "videoUri",
+            "columnName": "video_uri",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "created_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastEditedAt",
+            "columnName": "last_edited_at",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "videoRId"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_VideoRecords_game_id",
+            "unique": false,
+            "columnNames": [
+              "game_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_VideoRecords_game_id` ON `${TABLE_NAME}` (`game_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "Games",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "game_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "Games_fts",
+        "createSql": "CREATE VIRTUAL TABLE IF NOT EXISTS `${TABLE_NAME}` USING FTS4(`game_name` TEXT NOT NULL, content=`Games`)",
+        "fields": [
+          {
+            "fieldPath": "gameName",
+            "columnName": "game_name",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": []
+        },
+        "ftsVersion": "FTS4",
+        "ftsOptions": {
+          "tokenizer": "simple",
+          "tokenizerArgs": [],
+          "contentTable": "Games",
+          "languageIdColumnName": "",
+          "matchInfo": "FTS4",
+          "notIndexedColumns": [],
+          "prefixSizes": [],
+          "preferredOrder": "ASC"
+        },
+        "contentSyncTriggers": [
+          "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_Games_fts_BEFORE_UPDATE BEFORE UPDATE ON `Games` BEGIN DELETE FROM `Games_fts` WHERE `docid`=OLD.`rowid`; END",
+          "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_Games_fts_BEFORE_DELETE BEFORE DELETE ON `Games` BEGIN DELETE FROM `Games_fts` WHERE `docid`=OLD.`rowid`; END",
+          "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_Games_fts_AFTER_UPDATE AFTER UPDATE ON `Games` BEGIN INSERT INTO `Games_fts`(`docid`, `game_name`) VALUES (NEW.`rowid`, NEW.`game_name`); END",
+          "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_Games_fts_AFTER_INSERT AFTER INSERT ON `Games` BEGIN INSERT INTO `Games_fts`(`docid`, `game_name`) VALUES (NEW.`rowid`, NEW.`game_name`); END"
+        ]
+      },
+      {
+        "tableName": "text_records_fts",
+        "createSql": "CREATE VIRTUAL TABLE IF NOT EXISTS `${TABLE_NAME}` USING FTS4(`content` TEXT NOT NULL, content=`TextRecords`)",
+        "fields": [
+          {
+            "fieldPath": "content",
+            "columnName": "content",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": []
+        },
+        "ftsVersion": "FTS4",
+        "ftsOptions": {
+          "tokenizer": "simple",
+          "tokenizerArgs": [],
+          "contentTable": "TextRecords",
+          "languageIdColumnName": "",
+          "matchInfo": "FTS4",
+          "notIndexedColumns": [],
+          "prefixSizes": [],
+          "preferredOrder": "ASC"
+        },
+        "contentSyncTriggers": [
+          "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_text_records_fts_BEFORE_UPDATE BEFORE UPDATE ON `TextRecords` BEGIN DELETE FROM `text_records_fts` WHERE `docid`=OLD.`rowid`; END",
+          "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_text_records_fts_BEFORE_DELETE BEFORE DELETE ON `TextRecords` BEGIN DELETE FROM `text_records_fts` WHERE `docid`=OLD.`rowid`; END",
+          "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_text_records_fts_AFTER_UPDATE AFTER UPDATE ON `TextRecords` BEGIN INSERT INTO `text_records_fts`(`docid`, `content`) VALUES (NEW.`rowid`, NEW.`content`); END",
+          "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_text_records_fts_AFTER_INSERT AFTER INSERT ON `TextRecords` BEGIN INSERT INTO `text_records_fts`(`docid`, `content`) VALUES (NEW.`rowid`, NEW.`content`); END"
+        ]
+      },
+      {
+        "tableName": "image_records_fts",
+        "createSql": "CREATE VIRTUAL TABLE IF NOT EXISTS `${TABLE_NAME}` USING FTS4(`image_uri` TEXT NOT NULL, content=`ImageRecords`)",
+        "fields": [
+          {
+            "fieldPath": "imageUri",
+            "columnName": "image_uri",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": []
+        },
+        "ftsVersion": "FTS4",
+        "ftsOptions": {
+          "tokenizer": "simple",
+          "tokenizerArgs": [],
+          "contentTable": "ImageRecords",
+          "languageIdColumnName": "",
+          "matchInfo": "FTS4",
+          "notIndexedColumns": [],
+          "prefixSizes": [],
+          "preferredOrder": "ASC"
+        },
+        "contentSyncTriggers": [
+          "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_image_records_fts_BEFORE_UPDATE BEFORE UPDATE ON `ImageRecords` BEGIN DELETE FROM `image_records_fts` WHERE `docid`=OLD.`rowid`; END",
+          "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_image_records_fts_BEFORE_DELETE BEFORE DELETE ON `ImageRecords` BEGIN DELETE FROM `image_records_fts` WHERE `docid`=OLD.`rowid`; END",
+          "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_image_records_fts_AFTER_UPDATE AFTER UPDATE ON `ImageRecords` BEGIN INSERT INTO `image_records_fts`(`docid`, `image_uri`) VALUES (NEW.`rowid`, NEW.`image_uri`); END",
+          "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_image_records_fts_AFTER_INSERT AFTER INSERT ON `ImageRecords` BEGIN INSERT INTO `image_records_fts`(`docid`, `image_uri`) VALUES (NEW.`rowid`, NEW.`image_uri`); END"
+        ]
+      },
+      {
+        "tableName": "video_records_fts",
+        "createSql": "CREATE VIRTUAL TABLE IF NOT EXISTS `${TABLE_NAME}` USING FTS4(`video_uri` TEXT NOT NULL, content=`VideoRecords`)",
+        "fields": [
+          {
+            "fieldPath": "videoUri",
+            "columnName": "video_uri",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": []
+        },
+        "ftsVersion": "FTS4",
+        "ftsOptions": {
+          "tokenizer": "simple",
+          "tokenizerArgs": [],
+          "contentTable": "VideoRecords",
+          "languageIdColumnName": "",
+          "matchInfo": "FTS4",
+          "notIndexedColumns": [],
+          "prefixSizes": [],
+          "preferredOrder": "ASC"
+        },
+        "contentSyncTriggers": [
+          "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_video_records_fts_BEFORE_UPDATE BEFORE UPDATE ON `VideoRecords` BEGIN DELETE FROM `video_records_fts` WHERE `docid`=OLD.`rowid`; END",
+          "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_video_records_fts_BEFORE_DELETE BEFORE DELETE ON `VideoRecords` BEGIN DELETE FROM `video_records_fts` WHERE `docid`=OLD.`rowid`; END",
+          "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_video_records_fts_AFTER_UPDATE AFTER UPDATE ON `VideoRecords` BEGIN INSERT INTO `video_records_fts`(`docid`, `video_uri`) VALUES (NEW.`rowid`, NEW.`video_uri`); END",
+          "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_video_records_fts_AFTER_INSERT AFTER INSERT ON `VideoRecords` BEGIN INSERT INTO `video_records_fts`(`docid`, `video_uri`) VALUES (NEW.`rowid`, NEW.`video_uri`); END"
+        ]
+      },
+      {
+        "tableName": "tags_fts",
+        "createSql": "CREATE VIRTUAL TABLE IF NOT EXISTS `${TABLE_NAME}` USING FTS4(`tag_name` TEXT NOT NULL, content=`Tags`)",
+        "fields": [
+          {
+            "fieldPath": "tagName",
+            "columnName": "tag_name",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": []
+        },
+        "ftsVersion": "FTS4",
+        "ftsOptions": {
+          "tokenizer": "simple",
+          "tokenizerArgs": [],
+          "contentTable": "Tags",
+          "languageIdColumnName": "",
+          "matchInfo": "FTS4",
+          "notIndexedColumns": [],
+          "prefixSizes": [],
+          "preferredOrder": "ASC"
+        },
+        "contentSyncTriggers": [
+          "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_tags_fts_BEFORE_UPDATE BEFORE UPDATE ON `Tags` BEGIN DELETE FROM `tags_fts` WHERE `docid`=OLD.`rowid`; END",
+          "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_tags_fts_BEFORE_DELETE BEFORE DELETE ON `Tags` BEGIN DELETE FROM `tags_fts` WHERE `docid`=OLD.`rowid`; END",
+          "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_tags_fts_AFTER_UPDATE AFTER UPDATE ON `Tags` BEGIN INSERT INTO `tags_fts`(`docid`, `tag_name`) VALUES (NEW.`rowid`, NEW.`tag_name`); END",
+          "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_tags_fts_AFTER_INSERT AFTER INSERT ON `Tags` BEGIN INSERT INTO `tags_fts`(`docid`, `tag_name`) VALUES (NEW.`rowid`, NEW.`tag_name`); END"
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a2859c844a2f70b9d2ce73c0826bc4cf')"
+    ]
+  }
+}

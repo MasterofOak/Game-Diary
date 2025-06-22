@@ -2,10 +2,8 @@ package com.masterofoak.gamediary.navigation
 
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Newspaper
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.VideogameAsset
-import androidx.compose.material.icons.outlined.Newspaper
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.VideogameAsset
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -18,9 +16,6 @@ object NavigationGraphs {
     
     @Serializable
     object SearchGraph
-    
-    @Serializable
-    object FeedGraph
 }
 
 object NavigationDestinations {
@@ -31,13 +26,10 @@ object NavigationDestinations {
     data class GameDetailScreen(val gameId: Int)
     
     @Serializable
-    object AddGameScreen
+    data class AddGameScreen(val gameId: Int?)
     
     @Serializable
     object SearchScreen
-    
-    @Serializable
-    object FeedScreen
 }
 
 enum class BottomNavigationItems(
@@ -61,12 +53,5 @@ enum class BottomNavigationItems(
         iconName = R.string.search_btn_icon_name,
         label = R.string.search_btn_label,
         destination = NavigationDestinations.SearchScreen
-    ),
-    FeedButton(
-        selectedIcon = Icons.Default.Newspaper,
-        unselectedIcon = Icons.Outlined.Newspaper,
-        iconName = R.string.feed_btn_icon_name,
-        label = R.string.feed_btn_label,
-        destination = NavigationDestinations.FeedScreen
     )
 }

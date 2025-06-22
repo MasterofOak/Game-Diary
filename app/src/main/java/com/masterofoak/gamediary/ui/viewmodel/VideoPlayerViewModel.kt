@@ -33,16 +33,3 @@ class VideoPlayerViewModel(application: Application) : AndroidViewModel(applicat
         exoPlayer.release()
     }
 }
-
-//@androidx.annotation.OptIn(UnstableApi::class)
-//private fun initPlayer(context: Context): ExoPlayer {
-//    return ExoPlayer.Builder(context).apply {
-//        setSeekBackIncrementMs(10000)
-//        setSeekForwardIncrementMs(10000)
-//    }.build().apply {
-//        setMediaItem(MediaItem.fromUri(""))
-//        setAudioAttributes(AudioAttributes.DEFAULT, true)
-//        prepare()
-//        playWhenReady = false
-//    }
-//}

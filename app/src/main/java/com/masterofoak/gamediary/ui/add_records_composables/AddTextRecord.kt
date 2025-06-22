@@ -23,20 +23,35 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.masterofoak.gamediary.model.StyleRange
+import com.masterofoak.gamediary.model.db_entities.TextRecord
 import com.masterofoak.gamediary.utils.buildAnnotatedStringHelper
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import kotlin.math.max
 import kotlin.math.min
 
 
 @Composable
 fun AddTextRecord(
-    updateState: (String, List<StyleRange>) -> Unit
+    recordToUpdate: TextRecord?,
+    updateState: (String, List<StyleRange>) -> Unit,
 ) {
-    var textFieldValue by remember { mutableStateOf(TextFieldValue("", selection = TextRange(0))) }
-    var styleRanges by remember { mutableStateOf(listOf<StyleRange>()) }
+    var textFieldValue by remember {
+        mutableStateOf(
+            TextFieldValue(
+                recordToUpdate?.content ?: "", selection = TextRange(0)
+            )
+        )
+    }
+    var styleRanges by remember {
+        if (recordToUpdate != null) {
+            return@remember mutableStateOf(Json.decodeFromString<List<StyleRange>>(recordToUpdate.styleRanges))
+        } else {
+            return@remember mutableStateOf(listOf<StyleRange>())
+        }
+    }
     var textFieldJob by remember { mutableStateOf<Job?>(null) }
     val coroutineScope = rememberCoroutineScope()
     Column {
@@ -78,18 +93,9 @@ fun AddTextRecord(
         Spacer(modifier = Modifier.size(8.dp))
         FormattingButtons(
             textFieldValue = textFieldValue,
-            styleRanges,
+            styleRanges = styleRanges,
             updateStyleRangesList = { styleRanges = it },
             updateTextFieldValue = { textFieldValue = it })
-//        val styleDataJson = Json.encodeToString(styleRanges)
-//        addTextRecord(
-//            TextRecord(
-//                gameId = userRecordUiState.currentlySelectedGameId!!,
-//                content = textFieldValue.text,
-//                styleRanges = styleDataJson,
-//                createdAt = System.currentTimeMillis(),
-//            )
-//        )
     }
 }
 

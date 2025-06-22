@@ -24,14 +24,13 @@ import androidx.core.content.ContextCompat
 import com.masterofoak.gamediary.utils.getUriForFile
 
 @Composable
-fun AddImageRecord(updateState: (String) -> Unit) {
+fun AddImageRecord(gameString: String, updateState: (String) -> Unit) {
     val context = LocalContext.current
     val flag = Intent.FLAG_GRANT_READ_URI_PERMISSION
     var capturedImageUri by remember { mutableStateOf<Uri?>(null) }
     LaunchedEffect(capturedImageUri) {
         if (capturedImageUri != null) {
             updateState(capturedImageUri.toString())
-            println("Link updated")
         }
     }
     val photoPickerLauncher = rememberLauncherForActivityResult(
@@ -55,7 +54,9 @@ fun AddImageRecord(updateState: (String) -> Unit) {
         contract = ActivityResultContracts.RequestPermission(),
     ) { isGranted: Boolean ->
         if (isGranted) {
-            val imageUri = getUriForFile(context, "images", ".jpg")
+            val imageUri = getUriForFile(
+                gameString = gameString, fileFolder = "images", fileExtension = ".jpg", context = context
+            )
             capturedImageUri = imageUri
             cameraLauncher.launch(imageUri)
         }
@@ -89,7 +90,9 @@ fun AddImageRecord(updateState: (String) -> Unit) {
                     if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
                         == PackageManager.PERMISSION_GRANTED
                     ) {
-                        val imageUri = getUriForFile(context, "images", ".jpg")
+                        val imageUri = getUriForFile(
+                            gameString = gameString, fileFolder = "images", fileExtension = ".jpg", context = context
+                        )
                         capturedImageUri = imageUri
                         cameraLauncher.launch(imageUri)
                     } else {

@@ -1,7 +1,9 @@
-package com.masterofoak.gamediary.model
+package com.masterofoak.gamediary.model.db_entities
 
 import androidx.room.*
 import androidx.room.ForeignKey.Companion.CASCADE
+import com.masterofoak.gamediary.model.RecordType
+import com.masterofoak.gamediary.model.Records
 
 @Entity(
     tableName = "ImageRecords",
@@ -19,6 +21,7 @@ data class ImageRecord(
     @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "imageRId") override val id: Int = 0,
     @ColumnInfo(name = "game_id") val gameId: Int,
     @ColumnInfo(name = "image_uri") val imageUri: String,
+    @ColumnInfo(name = "caption") val caption: String? = null,
     @ColumnInfo(name = "created_at") override val createdAt: Long,
     @ColumnInfo(name = "last_edited_at") val lastEditedAt: Long? = null
 ) : Records {

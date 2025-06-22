@@ -1,4 +1,4 @@
-package com.masterofoak.gamediary.model
+package com.masterofoak.gamediary.model.db_entities
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity

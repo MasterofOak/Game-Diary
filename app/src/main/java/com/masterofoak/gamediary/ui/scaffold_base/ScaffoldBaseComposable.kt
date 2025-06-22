@@ -27,6 +27,8 @@ fun ScaffoldBaseComposable(
             AddUserRecordDialog(
                 it.userRecordViewModel,
                 it.recordType,
+                it.isUpdateMode,
+                it.recordToUpdate,
                 it.onDialogDismiss,
                 it.modifier
             )

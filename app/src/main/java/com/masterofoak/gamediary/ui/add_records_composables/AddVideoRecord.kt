@@ -24,7 +24,7 @@ import androidx.core.content.ContextCompat
 import com.masterofoak.gamediary.utils.getUriForFile
 
 @Composable
-fun AddVideoRecord(updateState: (String) -> Unit) {
+fun AddVideoRecord(gameString: String, updateState: (String) -> Unit) {
     val context = LocalContext.current
     val flag = Intent.FLAG_GRANT_READ_URI_PERMISSION
     var capturedVideoUri by remember { mutableStateOf<Uri?>(null) }
@@ -59,7 +59,9 @@ fun AddVideoRecord(updateState: (String) -> Unit) {
         val cameraGranted = permissions[Manifest.permission.CAMERA] == true
         val audioGranted = permissions[Manifest.permission.RECORD_AUDIO] == true
         if (cameraGranted && audioGranted) {
-            val videoUri = getUriForFile(context, "videos", ".mp4")
+            val videoUri = getUriForFile(
+                gameString = gameString, fileFolder = "videos", fileExtension = ".mp4", context = context
+            )
             capturedVideoUri = videoUri
             cameraLauncher.launch(videoUri)
         }
@@ -103,7 +105,9 @@ fun AddVideoRecord(updateState: (String) -> Unit) {
                     if (permissionsToRequest.isNotEmpty()) {
                         videoPermissionsLauncher.launch(permissionsToRequest.toTypedArray())
                     } else {
-                        val videoUri = getUriForFile(context, "videos", ".mp4")
+                        val videoUri = getUriForFile(
+                            gameString = gameString, fileFolder = "videos", fileExtension = ".mp4", context = context
+                        )
                         capturedVideoUri = videoUri
                         cameraLauncher.launch(videoUri)
                     }

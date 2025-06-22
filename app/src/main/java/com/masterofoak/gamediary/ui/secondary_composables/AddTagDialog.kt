@@ -12,14 +12,14 @@ import androidx.compose.ui.tooling.preview.Preview
 @Composable
 fun AddTagDialog(onDialogDismiss: () -> Unit, onConfirmButtonClicked: (String) -> Unit, modifier: Modifier = Modifier) {
     var customTagTextField by remember { mutableStateOf("") }
-    var isValid by remember { mutableStateOf(false) }
+    var isError by remember { mutableStateOf(false) }
     val isInputValid: () -> Boolean = { customTagTextField.trim().isNotEmpty() }
     AlertDialog(
         onDismissRequest = { onDialogDismiss() },
         dismissButton = { TextButton(onClick = { onDialogDismiss() }) { Text("Cancel") } },
         confirmButton = {
             TextButton(onClick = {
-                if (isInputValid()) onConfirmButtonClicked(customTagTextField) else isValid = true
+                if (isInputValid()) onConfirmButtonClicked(customTagTextField) else isError = true
             }) {
                 Text("Add")
             }
@@ -31,10 +31,10 @@ fun AddTagDialog(onDialogDismiss: () -> Unit, onConfirmButtonClicked: (String) -
                     value = customTagTextField,
                     onValueChange = { customTagTextField = it },
                     singleLine = true,
-                    isError = isValid,
+                    isError = isError,
                     placeholder = { Text("e.g favorite") },
                     supportingText = {
-                        if (isValid) Text("Name should be at least 1 character long") else Text("")
+                        if (isError) Text("Name should be at least 1 character long") else Text("")
                     }
                 )
             }

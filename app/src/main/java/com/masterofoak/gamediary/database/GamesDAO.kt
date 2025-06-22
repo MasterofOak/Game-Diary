@@ -4,7 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.masterofoak.gamediary.model.Game
+import com.masterofoak.gamediary.model.db_entities.Game
 import kotlinx.coroutines.flow.Flow
 
 @Dao

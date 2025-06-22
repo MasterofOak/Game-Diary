@@ -11,6 +11,11 @@ class DBContainer(private val context: Context) : DatabaseContainer {
     
     override val gamesDBRepository: GamesDBRepository by lazy {
         val database = GameDiaryDatabase.getDatabase(context)
-        OfflineGamesRepository(database.gamesDao(), database.tagsDao(), database.userRecordsDao())
+        OfflineGamesRepository(
+            database.gamesDao(),
+            database.tagsDao(),
+            database.userRecordsDao(),
+            database.searchFtsDao()
+        )
     }
 }

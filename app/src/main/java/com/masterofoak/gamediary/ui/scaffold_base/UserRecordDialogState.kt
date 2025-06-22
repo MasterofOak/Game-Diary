@@ -5,13 +5,16 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import com.masterofoak.gamediary.model.RecordType
+import com.masterofoak.gamediary.model.Records
 import com.masterofoak.gamediary.ui.viewmodel.UserRecordViewModel
 
 data class UserRecordDialogState(
     val userRecordViewModel: UserRecordViewModel,
     val recordType: RecordType,
+    val isUpdateMode: Boolean = false,
+    val recordToUpdate: Records? = null,
     val onDialogDismiss: () -> Unit = { GlobalDialogManager.dismissAlertDialog() },
-    val modifier: Modifier = Modifier.fillMaxWidth(0.9f)
+    val modifier: Modifier = Modifier.fillMaxWidth(0.9f),
 )
 
 object GlobalDialogManager {
